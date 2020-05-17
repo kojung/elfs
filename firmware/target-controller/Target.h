@@ -21,25 +21,29 @@
 #include <Arduino.h>
 #include "FastLED.h"
 
-#define TARGET_NUM_LEDS (16)
+#define TARGET_NUM_LEDS                   (16)
+#define TARGET_DEFAULT_SENSOR_THRESHOLD  (400)
+#define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
 
 typedef uint8_t pin_t;
 
 typedef enum target_mode_e {
-    ENABLED = 0,        // target enabled
-    TIMED,              // target enabled for a limited time
-    DISABLED            // target disabled
+    TARGET_ENABLED = 0,        // target enabled
+    TARGET_TIMED,              // target enabled for a limited time
+    TARGET_DISABLED            // target disabled
 } target_mode_t;
 
+template<pin_t LED>
 class Target {
  public:
     /** constructor
-    * Provide the 3 pins that defines the target
-    * @param led     DI pin of Neopixel LED
+    * We need 3 pins for the target: led, ldr, trigger
+    * led is provided as a template argument. ldr and trigger are provided
+    * in the constructor.
     * @param ldr     Light dependent resistor pin
     * @param trigger Active high relay that controls the target actuator
     */
-    Target(pin_t led, pin_t ldr, pin_t trigger);
+    Target(pin_t ldr, pin_t trigger);
 
     /** Set target mode
     * @param mode Target mode
@@ -58,12 +62,33 @@ class Target {
     */
     bool get_hit_state();
 
+    /** Set sensor threshold
+    */
+    void set_sensor_threshold(int sensor_threshold);
+
+    /** Get sensor threshold
+    */
+    int get_sensor_threshold();
+
+    /** Set timer interval
+    */
+    void set_timer_interval(unsigned long timer_interval);
+
+    /** Get timer interval
+    */
+    unsigned long get_timer_interval();
+
  private:
     void set_color(uint8_t count, CRGB color);
 
-    bool hit_state_;
-    pin_t led_;
     pin_t ldr_;
     pin_t trigger_;
+    target_mode_t mode_;
+    bool hit_state_;
+    int sensor_threshold_;
+    CRGB ring_[TARGET_NUM_LEDS];
+    uint8_t led_counter_;
+    unsigned long last_update_time_;
+    unsigned long timer_interval_;
 };
 
