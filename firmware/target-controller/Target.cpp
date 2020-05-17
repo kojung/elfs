@@ -18,15 +18,14 @@
 
 #include "Target.h"
 
-template<pin_t LED>
-Target<LED>::Target(pin_t ldr, pin_t trigger) :
-    ldr_(ldr),
-    trigger_(trigger),
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+Target<LED, LDR, TRIGGER>::Target() :
     sensor_threshold_(TARGET_DEFAULT_SENSOR_THRESHOLD),
     timer_interval_(TARGET_DEFAULT_TIMER_INTERVAL) {
     // configure pins
-    pinMode(ldr_,     INPUT);  // analog
-    pinMode(trigger_, OUTPUT);
+    pinMode(LED,     OUTPUT);
+    pinMode(LDR,     INPUT);  // analog
+    pinMode(TRIGGER, OUTPUT);
 
     // create ring of led
     FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
@@ -35,8 +34,8 @@ Target<LED>::Target(pin_t ldr, pin_t trigger) :
     set_mode(TARGET_DISABLED);
 }
 
-template<pin_t LED>
-void Target<LED>::set_mode(target_mode_t mode) {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::set_mode(target_mode_t mode) {
     if (mode == TARGET_ENABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Green);
     } else if (mode == TARGET_TIMED) {
@@ -48,11 +47,11 @@ void Target<LED>::set_mode(target_mode_t mode) {
     }
 }
 
-template<pin_t LED>
-bool Target<LED>::update() {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+bool Target<LED, LDR, TRIGGER>::update() {
     // update only if target is enabled AND hasn't been hit yet
     if (mode_ != TARGET_DISABLED && !hit_state_) {
-        if (analogRead(ldr_) < sensor_threshold_) {
+        if (analogRead(LDR) < sensor_threshold_) {
             hit_state_ = true;
             // @TODO
             // change color, trigger actuator, etc...
@@ -73,13 +72,13 @@ bool Target<LED>::update() {
     return false;
 }
 
-template<pin_t LED>
-bool Target<LED>::get_hit_state() {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+bool Target<LED, LDR, TRIGGER>::get_hit_state() {
     return hit_state_;
 }
 
-template<pin_t LED>
-void Target<LED>::set_color(uint8_t count, CRGB color) {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::set_color(uint8_t count, CRGB color) {
     for (uint8_t i=0; i<count; i++) {
         ring_[i] = color;
     }
@@ -88,22 +87,22 @@ void Target<LED>::set_color(uint8_t count, CRGB color) {
     }
 }
 
-template<pin_t LED>
-void Target<LED>::set_sensor_threshold(int sensor_threshold) {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::set_sensor_threshold(int sensor_threshold) {
     sensor_threshold_ = sensor_threshold;
 }
 
-template<pin_t LED>
-int Target<LED>::get_sensor_threshold() {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+int Target<LED, LDR, TRIGGER>::get_sensor_threshold() {
     return sensor_threshold_;
 }
 
-template<pin_t LED>
-void Target<LED>::set_timer_interval(unsigned long timer_interval) {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::set_timer_interval(unsigned long timer_interval) {
     timer_interval_ = timer_interval;
 }
 
-template<pin_t LED>
-unsigned long Target<LED>::get_timer_interval() {
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+unsigned long Target<LED, LDR, TRIGGER>::get_timer_interval() {
     return timer_interval_;
 }

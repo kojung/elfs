@@ -33,17 +33,12 @@ typedef enum target_mode_e {
     TARGET_DISABLED            // target disabled
 } target_mode_t;
 
-template<pin_t LED>
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 class Target {
  public:
     /** constructor
-    * We need 3 pins for the target: led, ldr, trigger
-    * led is provided as a template argument. ldr and trigger are provided
-    * in the constructor.
-    * @param ldr     Light dependent resistor pin
-    * @param trigger Active high relay that controls the target actuator
     */
-    Target(pin_t ldr, pin_t trigger);
+    Target();
 
     /** Set target mode
     * @param mode Target mode
@@ -81,14 +76,21 @@ class Target {
  private:
     void set_color(uint8_t count, CRGB color);
 
-    pin_t ldr_;
-    pin_t trigger_;
+    // Current target mode
     target_mode_t mode_;
+
+    // Flag indicating if target has been hit or not
     bool hit_state_;
+
+    // Adjust sensor sensitivity
     int sensor_threshold_;
+
+    // Array holding ring colors
     CRGB ring_[TARGET_NUM_LEDS];
-    uint8_t led_counter_;
-    unsigned long last_update_time_;
-    unsigned long timer_interval_;
+
+    // Counters used in TIMED mode
+    uint8_t led_counter_;              // count LEDs
+    unsigned long last_update_time_;   // keep track of last time
+    unsigned long timer_interval_;     // how often to update the LED counter
 };
 
