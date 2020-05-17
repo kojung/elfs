@@ -24,6 +24,7 @@
 #define TARGET_NUM_LEDS                   (16)
 #define TARGET_DEFAULT_SENSOR_THRESHOLD  (400)
 #define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
+#define TARGET_DEFAULT_RING_BRIGHTNESS   (128)
 
 typedef uint8_t pin_t;
 
@@ -48,7 +49,7 @@ class Target {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return True if internal state changed
+    * @return True if hit state changed
     */
     bool update();
 
@@ -57,24 +58,26 @@ class Target {
     */
     bool get_hit_state();
 
-    /** Set sensor threshold
-    */
+    /** Accessors for sensor threshold */
     void set_sensor_threshold(int sensor_threshold);
-
-    /** Get sensor threshold
-    */
     int get_sensor_threshold();
 
-    /** Set timer interval
-    */
+    /** Accessors for timer interval */
     void set_timer_interval(unsigned long timer_interval);
-
-    /** Get timer interval
-    */
     unsigned long get_timer_interval();
+
+    /** Accessors for ring brightness */
+    void set_ring_brightness(int brightness);
+    int get_ring_brightness();
 
  private:
     void set_color(uint8_t count, CRGB color);
+
+    // FastLED controller
+    CLEDController* controller_;
+
+    // provide feedback for hit
+    void hit_feedback();
 
     // Current target mode
     target_mode_t mode_;
@@ -85,6 +88,9 @@ class Target {
     // Adjust sensor sensitivity
     int sensor_threshold_;
 
+    // Adjust ring brightness
+    int ring_brightness_;
+
     // Array holding ring colors
     CRGB ring_[TARGET_NUM_LEDS];
 
@@ -93,4 +99,3 @@ class Target {
     unsigned long last_update_time_;   // keep track of last time
     unsigned long timer_interval_;     // how often to update the LED counter
 };
-

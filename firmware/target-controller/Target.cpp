@@ -28,7 +28,7 @@ Target<LED, LDR, TRIGGER>::Target() :
     pinMode(TRIGGER, OUTPUT);
 
     // create ring of led
-    FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
+    controller_ = FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
 
     // turn off the ring by default
     set_mode(TARGET_DISABLED);
@@ -36,13 +36,14 @@ Target<LED, LDR, TRIGGER>::Target() :
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::set_mode(target_mode_t mode) {
-    if (mode == TARGET_ENABLED) {
+    mode_ = mode;
+    if (mode_ == TARGET_ENABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Green);
-    } else if (mode == TARGET_TIMED) {
-        set_color(TARGET_NUM_LEDS, CRGB::Green);
-        last_update_time_ = millis();
+    } else if (mode_ == TARGET_TIMED) {
         led_counter_ = TARGET_NUM_LEDS;
-    } else if (mode == TARGET_DISABLED) {
+        set_color(led_counter_, CRGB::Green);
+        last_update_time_ = millis();
+    } else if (mode_ == TARGET_DISABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Black);
     }
 }
@@ -53,8 +54,7 @@ bool Target<LED, LDR, TRIGGER>::update() {
     if (mode_ != TARGET_DISABLED && !hit_state_) {
         if (analogRead(LDR) < sensor_threshold_) {
             hit_state_ = true;
-            // @TODO
-            // change color, trigger actuator, etc...
+            hit_feedback();
             return true;
         } else {
             // update timer?
@@ -73,6 +73,22 @@ bool Target<LED, LDR, TRIGGER>::update() {
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::hit_feedback() {
+    // trigger actuator
+    digitalWrite(TRIGGER, HIGH);
+    // blink red
+    for(int i=0; i<10; i++) {
+        set_color(TARGET_NUM_LEDS, CRGB::Red);
+        delay(30);
+        set_color(TARGET_NUM_LEDS, CRGB::Black);
+        delay(30);
+        if (i==5) {
+            digitalWrite(TRIGGER, LOW);
+        }
+    }
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 bool Target<LED, LDR, TRIGGER>::get_hit_state() {
     return hit_state_;
 }
@@ -85,6 +101,7 @@ void Target<LED, LDR, TRIGGER>::set_color(uint8_t count, CRGB color) {
     for (uint8_t i=count; i<TARGET_NUM_LEDS; i++) {
         ring_[i] = CRGB::Black;
     }
+    controller_->showLeds(ring_brightness_);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
@@ -105,4 +122,14 @@ void Target<LED, LDR, TRIGGER>::set_timer_interval(unsigned long timer_interval)
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 unsigned long Target<LED, LDR, TRIGGER>::get_timer_interval() {
     return timer_interval_;
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::set_ring_brightness(int ring_brightness) {
+    ring_brightness_ = ring_brightness;
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+int Target<LED, LDR, TRIGGER>::get_ring_brightness() {
+    return ring_brightness_;
 }
