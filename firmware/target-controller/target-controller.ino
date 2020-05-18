@@ -17,13 +17,17 @@
 */
 
 #include "Target.h"
+#include "TargetBase.h"
 
 #define NUM_TARGETS (4)
 
-Target<2, A0, 6> t0;
-Target<3, A1, 7> t1;
-Target<4, A2, 8> t2;
-Target<5, A3, 9> t3;
+// collect targets into an array
+TargetBase* targets[NUM_TARGETS] = {
+    &Target<2, A0, 6>(),
+    &Target<3, A1, 7>(),
+    &Target<4, A2, 8>(),
+    &Target<5, A3, 9>()
+};
 
 void setup() {
 
