@@ -23,6 +23,10 @@
 
 typedef uint8_t pin_t;
 
+#define TARGET_DEFAULT_SENSOR_THRESHOLD  (400)
+#define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
+#define TARGET_DEFAULT_RING_BRIGHTNESS    (50)
+
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 class Target : public TargetBase {
  public:
@@ -46,6 +50,10 @@ class Target : public TargetBase {
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 Target<LED, LDR, TRIGGER>::Target() {
+    // default values
+    sensor_threshold_ = TARGET_DEFAULT_SENSOR_THRESHOLD;
+    ring_brightness_  = TARGET_DEFAULT_RING_BRIGHTNESS;
+    timer_interval_   = TARGET_DEFAULT_TIMER_INTERVAL;
     // configure pins
     pinMode(LED,     OUTPUT);
     pinMode(LDR,     INPUT);  // analog

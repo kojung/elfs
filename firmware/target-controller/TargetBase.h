@@ -22,9 +22,6 @@
 #include "FastLED.h"
 
 #define TARGET_NUM_LEDS                   (16)
-#define TARGET_DEFAULT_SENSOR_THRESHOLD  (400)
-#define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
-#define TARGET_DEFAULT_RING_BRIGHTNESS   (128)
 
 typedef enum target_mode_e {
     TARGET_ENABLED = 0,        // target enabled

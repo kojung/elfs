@@ -30,12 +30,21 @@ TargetBase* targets[NUM_TARGETS] = {
 };
 
 void setup() {
+    // enable serial
+    Serial.begin(115200);
+    while (!Serial) {
+        ; // wait for serial port to connect. Needed for native USB port only
+    }
 
+    Serial.println("Calling from Setup()");
+
+    // WIP
+    targets[0]->set_mode(TARGET_ENABLED);
 }
 
 void loop() {
-    while(1) {
-        ;
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->update();
     }
 }
 

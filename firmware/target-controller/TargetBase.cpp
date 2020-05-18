@@ -18,10 +18,8 @@
 
 #include "TargetBase.h"
 
-TargetBase::TargetBase() :
-    sensor_threshold_(TARGET_DEFAULT_SENSOR_THRESHOLD),
-    timer_interval_(TARGET_DEFAULT_TIMER_INTERVAL) {
-    // nothing else to do
+TargetBase::TargetBase() {
+    // nothing to initialize
 }
 
 TargetBase::~TargetBase() {
@@ -52,7 +50,7 @@ void TargetBase::set_color(uint8_t count, CRGB color) {
     for (uint8_t i=count; i<TARGET_NUM_LEDS; i++) {
         ring_[i] = CRGB::Black;
     }
-    controller_->showLeds(ring_brightness_);
+    controller_->showLeds(1); // ring_brightness_);
 }
 
 void TargetBase::set_sensor_threshold(int sensor_threshold) {
