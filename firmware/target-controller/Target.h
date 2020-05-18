@@ -23,9 +23,9 @@
 
 typedef uint8_t pin_t;
 
-#define TARGET_DEFAULT_SENSOR_THRESHOLD  (400)
+#define TARGET_DEFAULT_SENSOR_THRESHOLD  (500)
 #define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
-#define TARGET_DEFAULT_RING_BRIGHTNESS    (10)
+#define TARGET_DEFAULT_RING_BRIGHTNESS    (20)
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 class Target : public TargetBase {
@@ -98,7 +98,7 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
     // trigger actuator
     digitalWrite(TRIGGER, HIGH);
     // blink red
-    for(int i=0; i<10; i++) {
+    for(int i=0; i<20; i++) {
         set_color(TARGET_NUM_LEDS, CRGB::Red);
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
