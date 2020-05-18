@@ -22,14 +22,14 @@
 #define NUM_TARGETS (4)
 
 Target<2, A0, 6> t0;
+Target<3, A1, 7> t1;
+Target<4, A2, 8> t2;
+Target<5, A3, 9> t3;
+
+uint32_t counter;
 
 // collect targets into an array
-// TargetBase* targets[NUM_TARGETS] = {
-//     &Target<2, A0, 6>(),
-//     &Target<3, A1, 7>(),
-//     &Target<4, A2, 8>(),
-//     &Target<5, A3, 9>()
-// };
+TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 void setup() {
     // enable serial
@@ -40,15 +40,18 @@ void setup() {
 
     Serial.println("Calling from Setup()");
 
-    // WIP
-    t0.set_mode(TARGET_DISABLED);
-    t0.set_mode(TARGET_ENABLED);
-    // targets[0]->set_mode(TARGET_ENABLED);
+    // heart beat
+    counter = 0;
+
+    // enable all targets by default
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->set_mode(TARGET_ENABLED);
+    }
 }
 
 void loop() {
-    // for (uint8_t i=0; i < NUM_TARGETS; i++) {
-    //     targets[i]->update();
-    // }
-    Serial.println("Inside Loop");
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->update();
+    }
+    Serial.println(counter++);
 }
