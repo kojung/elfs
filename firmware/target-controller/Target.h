@@ -43,6 +43,9 @@ class Target : public TargetBase {
     */
     bool update() override;
 
+    /** Run selftest */
+    void run_self_test() override;
+
  private:
     // provide feedback for hit
     void hit_feedback();
@@ -107,4 +110,19 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
             digitalWrite(TRIGGER, LOW);
         }
     }
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::run_self_test() {
+    // exercise all LEDs in white
+    for(int i=0; i<TARGET_NUM_LEDS; i++) {
+        set_color(i, CRGB::White);
+        delay(50);
+    }
+    set_color(TARGET_NUM_LEDS, CRGB::Black);
+
+    // exercise trigger
+    digitalWrite(TRIGGER, HIGH);
+    delay(1000);
+    digitalWrite(TRIGGER, LOW);
 }

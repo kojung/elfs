@@ -18,6 +18,7 @@
 
 #include "Target.h"
 #include "TargetBase.h"
+#include "cmd.h"
 
 #define NUM_TARGETS (4)
 
@@ -25,8 +26,6 @@ Target<2, A0, 6> t0;
 Target<3, A1, 7> t1;
 Target<4, A2, 8> t2;
 Target<5, A3, 9> t3;
-
-uint32_t counter;
 
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
@@ -38,11 +37,6 @@ void setup() {
         ; // wait for serial port to connect. Needed for native USB port only
     }
 
-    Serial.println("Calling from Setup()");
-
-    // heart beat
-    counter = 0;
-
     // enable all targets by default
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_mode(TARGET_ENABLED);
@@ -50,8 +44,71 @@ void setup() {
 }
 
 void loop() {
+    if (Serial.available() > 0) {
+        uint8_t opcode = Serial.read();
+        uint8_t arg;
+        switch(opcode) {
+            case CMD_SET_TARGET_ENABLE: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                targets[arg]->set_mode(TARGET_ENABLED);
+                break;
+            }
+            case CMD_SET_TARGET_TIMED: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                targets[arg]->set_mode(TARGET_TIMED);
+                break;
+            }
+            case CMD_SET_TARGET_DISABLED: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                targets[arg]->set_mode(TARGET_DISABLED);
+                break;
+            }
+
+            case CMD_SET_SENSOR_THRESHOLD: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                for (uint8_t i=0; i < NUM_TARGETS; i++) {
+                    targets[i]->set_sensor_threshold(arg);
+                }
+                break;
+            }
+        
+            case CMD_SET_TIMER_INTERVAL:
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                for (uint8_t i=0; i < NUM_TARGETS; i++) {
+                    targets[i]->set_timer_interval(arg);
+                }
+                break;
+
+            case CMD_SET_RING_BRIGHTNESS: 
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                for (uint8_t i=0; i < NUM_TARGETS; i++) {
+                    targets[i]->set_ring_brightness(arg);
+                }
+                break;
+
+            case CMD_RUN_SELF_TEST: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                targets[arg]->run_self_test();
+                break;
+            }
+            case CMD_GET_SENSOR_THRESHOLD:
+            case CMD_GET_RING_BRIGHTNESS: 
+            case CMD_GET_TIMER_INTERVAL:
+            case CMD_POLL_TARGET:
+            default:
+                // unrecognized or unimplemented commands
+                break;
+        }
+    }
+
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->update();
     }
-    Serial.println(counter++);
 }

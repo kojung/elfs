@@ -44,6 +44,9 @@ class TargetBase {
     */
     virtual bool update();
 
+    /** Run self test */
+    virtual void run_self_test();
+
     /** Set target mode
     * @param mode Target mode
     */
