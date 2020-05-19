@@ -26,11 +26,13 @@ A total of 14 pins are required:
 
 ## Requirements
 
-(TODO)
+Add the following libraries in your Arduino `libraries` directory.
+
+* [FastLED](https://github.com/FastLED/FastLED)
 
 ## Installation
 
-(TODO)
+Simply open the sketch `target-controller.ino` , set the board to `Arduino Uno` and click `Upload` in the Arduino IDE.
 
 ## Control
 
