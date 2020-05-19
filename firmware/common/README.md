@@ -33,8 +33,8 @@ See [cmd.h](cmd.h) header file for `OPCODE` encoding.
 The response protocol is composed of 3 fields:
 
 * 1-byte OPCODE
-* 1-byte TARGET ID
-* 1-byte value
+* 1-byte ARG1
+* 1-byte ARG2
 
 | OPCODE [1 byte]      | ARG1 [1-byte]      | ARG2 [1-byte]      | Meaning                                                      |
 | -------------------- | ------------------ | ------------------ | ------------------------------------------------------------ |
