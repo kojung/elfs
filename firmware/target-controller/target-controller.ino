@@ -19,6 +19,7 @@
 #include "Target.h"
 #include "TargetBase.h"
 #include "cmd.h"
+#include "rsp.h"
 
 #define NUM_TARGETS (4)
 
@@ -98,10 +99,32 @@ void loop() {
                 targets[arg]->run_self_test();
                 break;
             }
-            case CMD_GET_SENSOR_THRESHOLD:
-            case CMD_GET_RING_BRIGHTNESS: 
-            case CMD_GET_TIMER_INTERVAL:
-            case CMD_POLL_TARGET:
+            case CMD_GET_SENSOR_THRESHOLD: {
+                uint16_t arg = targets[0]->get_sensor_threshold();
+                Serial.write(RSP_SENSOR_THRESHOLD);
+                Serial.write((arg >> 8) & 0xFF);  // MSB
+                Serial.write(arg & 0xFF);         // LSB
+            }
+            case CMD_GET_RING_BRIGHTNESS: {
+                uint16_t arg = targets[0]->get_ring_brightness();
+                Serial.write(RSP_RING_BRIGHTNESS);
+                Serial.write((arg >> 8) & 0xFF);  // MSB
+                Serial.write(arg & 0xFF);         // LSB
+            }
+            case CMD_GET_TIMER_INTERVAL: {
+                uint16_t arg = targets[0]->get_timer_interval();
+                Serial.write(RSP_TIMER_INTERVAL);
+                Serial.write((arg >> 8) & 0xFF);  // MSB
+                Serial.write(arg & 0xFF);         // LSB
+            }
+            case CMD_POLL_TARGET: {
+                while ( !Serial.available() ) { }
+                arg = Serial.read();
+                uint8_t state = targets[arg]->get_hit_state();
+                Serial.write(RSP_HIT_STATUS);
+                Serial.write(state);
+                break;
+            }
             default:
                 // unrecognized or unimplemented commands
                 break;

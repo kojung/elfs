@@ -7,7 +7,7 @@ class Rsp(dict):
         opcodes = """
             RSP_HIT_STATUS
             RSP_SENSOR_THRESHOLD
-            RPS_RING_BRIGHTNESS
+            RSP_RING_BRIGHTNESS
             RSP_TIMER_INTERVAL""".split()
         for idx, opcode in enumerate(opcodes):
             self[opcode] = 0x80 + idx
