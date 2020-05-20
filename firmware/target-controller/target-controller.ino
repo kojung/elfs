@@ -49,7 +49,7 @@ void loop() {
         uint8_t opcode = Serial.read();
         uint8_t arg;
         switch(opcode) {
-            case CMD_SET_TARGET_ENABLE: {
+            case CMD_SET_TARGET_ENABLED: {
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->set_mode(TARGET_ENABLED);
