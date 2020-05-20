@@ -87,8 +87,8 @@ bool Target<LED, LDR, TRIGGER>::update() {
                 if (now - last_update_time_ > timer_interval_) {
                     led_counter_--;
                     set_color(led_counter_, CRGB::Green);
+                    last_update_time_ = now;
                 }
-                last_update_time_ = now;
             }
         }
     }
