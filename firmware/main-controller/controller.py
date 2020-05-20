@@ -54,18 +54,16 @@ class Controller():
 
     def reader(self):
         """method for reader thread"""
-        counter = 0
         while True:
-            data = self.ser.read()
-            print(f"{counter} data = '{data}'")
-            counter += 1
+            data = self.ser.read().decode('utf-8')
+            print(data, end="")
 
     def writer(self):
         """method for reader thread"""
         while True:
-            for i in range(4):
-                ctrl.set_target(i, 'ENABLED')
-            input("Press any key")
+            ctrl.set_target(0, 'ENABLED')
+            for i in range(1, 4):
+                ctrl.set_target(i, 'DISABLED')
 
 if __name__ == '__main__':
     ctrl = Controller(PORT)

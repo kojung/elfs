@@ -28,6 +28,7 @@ TargetBase::~TargetBase() {
 
 void TargetBase::set_mode(target_mode_t mode) {
     mode_ = mode;
+    hit_state_ = false;
     if (mode_ == TARGET_ENABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Green);
     } else if (mode_ == TARGET_TIMED) {

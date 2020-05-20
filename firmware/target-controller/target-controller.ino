@@ -31,6 +31,8 @@ Target<5, A3, 9> t3;
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
+uint32_t counter;
+
 void setup() {
     // enable serial
     Serial.begin(115200);
@@ -42,6 +44,8 @@ void setup() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_mode(TARGET_ENABLED);
     }
+
+    counter = 0;
 }
 
 void loop() {
@@ -132,6 +136,11 @@ void loop() {
     }
 
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->update();
+        bool status = targets[i]->update();
+        if (status) {
+            Serial.print("Target "); 
+            Serial.print(i); 
+            Serial.print(" triggered\n");
+        }
     }
 }
