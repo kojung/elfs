@@ -89,6 +89,11 @@ bool Target<LED, LDR, TRIGGER>::update() {
                     set_color(led_counter_, CRGB::Green);
                     last_update_time_ = now;
                 }
+
+                // if timer expired, disable the target
+                if (led_counter_ == 0) {
+                    set_mode(TARGET_DISABLED);
+                }
             }
         }
     }

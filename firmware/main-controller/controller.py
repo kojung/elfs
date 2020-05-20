@@ -49,7 +49,9 @@ class Controller():
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_SET_{attr}"
         opcode_value = self.cmd[opcode_name]
-        payload = bytearray([opcode_value, val])
+        msb = (val >> 8) & 0xFF
+        lsb = val & 0xFF
+        payload = bytearray([opcode_value, msb, lsb])
         self.ser.write(payload)
 
     def reader(self):
@@ -62,6 +64,7 @@ class Controller():
         """method for reader thread"""
         while True:
             print("Enable target 0 as TIMED")
+            ctrl.set('TIMER_INTERVAL', 1000)
             ctrl.set_target(0, 'TIMED')
             for i in range(1, 4):
                 ctrl.set_target(i, 'DISABLED')

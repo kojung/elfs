@@ -47,8 +47,8 @@ void setup() {
 void loop() {
     if (Serial.available() > 0) {
         uint8_t opcode = Serial.read();
-        uint16_t arg;
-        uint8_t state;
+        uint8_t arg;
+        uint16_t value;
         switch(opcode) {
             case CMD_SET_TARGET_ENABLED:
                 while ( !Serial.available() ) { }
@@ -60,9 +60,6 @@ void loop() {
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->set_mode(TARGET_TIMED);
-                Serial.print("Last update = ");
-                Serial.print(millis());
-                Serial.print("\n");
                 break;
 
             case CMD_SET_TARGET_DISABLED: 
@@ -73,25 +70,31 @@ void loop() {
 
             case CMD_SET_SENSOR_THRESHOLD:
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_sensor_threshold(arg);
+                    targets[i]->set_sensor_threshold(value);
                 }
                 break;
         
             case CMD_SET_TIMER_INTERVAL:
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_timer_interval(arg);
+                    targets[i]->set_timer_interval(value);
                 }
                 break;
 
             case CMD_SET_RING_BRIGHTNESS: 
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_ring_brightness(arg);
+                    targets[i]->set_ring_brightness(value);
                 }
                 break;
 
@@ -102,29 +105,29 @@ void loop() {
                 break;
 
             case CMD_GET_SENSOR_THRESHOLD:
-                arg = targets[0]->get_sensor_threshold();
+                value = targets[0]->get_sensor_threshold();
                 Serial.write(RSP_SENSOR_THRESHOLD);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
 
             case CMD_GET_RING_BRIGHTNESS:
-                arg = targets[0]->get_ring_brightness();
+                value = targets[0]->get_ring_brightness();
                 Serial.write(RSP_RING_BRIGHTNESS);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
 
             case CMD_GET_TIMER_INTERVAL:
-                arg = targets[0]->get_timer_interval();
+                value = targets[0]->get_timer_interval();
                 Serial.write(RSP_TIMER_INTERVAL);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
 
             case CMD_POLL_TARGET:
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
-                state = targets[arg]->get_hit_state();
+                value = targets[arg]->get_hit_state();
                 Serial.write(RSP_HIT_STATUS);
-                Serial.write(state);
+                Serial.write(value);
                 break;
 
             default:
