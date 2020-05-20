@@ -23,7 +23,7 @@ class Cmd(dict):
     def __init__(self):
         """Constructor"""
         opcodes = """
-            CMD_SET_TARGET_ENABLE
+            CMD_SET_TARGET_ENABLED
             CMD_SET_TARGET_TIMED
             CMD_SET_TARGET_DISABLED
             CMD_RUN_SELF_TEST

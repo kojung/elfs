@@ -2,7 +2,7 @@
 
 #pragma once
 
-#define CMD_SET_TARGET_ENABLE (0x80)
+#define CMD_SET_TARGET_ENABLED (0x80)
 #define CMD_SET_TARGET_TIMED (0x81)
 #define CMD_SET_TARGET_DISABLED (0x82)
 #define CMD_RUN_SELF_TEST (0x83)
