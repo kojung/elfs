@@ -64,7 +64,8 @@ class Controller():
         """method for reader thread"""
         while True:
             print("Enable target 0 as TIMED")
-            ctrl.set('TIMER_INTERVAL', 1000)
+            ctrl.set('TIMER_INTERVAL', 300)
+            ctrl.set('RING_BRIGHTNESS', 10)
             ctrl.set_target(0, 'TIMED')
             for i in range(1, 4):
                 ctrl.set_target(i, 'DISABLED')
