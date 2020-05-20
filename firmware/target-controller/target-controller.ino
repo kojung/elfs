@@ -31,8 +31,6 @@ Target<5, A3, 9> t3;
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
-uint32_t counter;
-
 void setup() {
     // enable serial
     Serial.begin(115200);
@@ -42,10 +40,8 @@ void setup() {
 
     // enable all targets by default
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->set_mode(TARGET_ENABLED);
+        targets[i]->set_mode(TARGET_DISABLED);
     }
-
-    counter = 0;
 }
 
 void loop() {

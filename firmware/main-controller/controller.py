@@ -61,9 +61,11 @@ class Controller():
     def writer(self):
         """method for reader thread"""
         while True:
+            print("Enable target 0")
             ctrl.set_target(0, 'ENABLED')
             for i in range(1, 4):
                 ctrl.set_target(i, 'DISABLED')
+            foo = input("\n")
 
 if __name__ == '__main__':
     ctrl = Controller(PORT)
