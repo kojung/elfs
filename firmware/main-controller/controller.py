@@ -3,6 +3,7 @@
 import threading
 import argparse
 import serial
+import time
 import cmd
 import rsp
 
@@ -66,8 +67,12 @@ class Controller():
             data = self.ser.read().decode('utf-8')
             print(data, end="")
 
-    def writer(self, filename):
+    def writer(self, filename, loop=False):
         """method for reader thread"""
+        # wait for serial port to be ready
+        time.sleep(2)
+
+        # execute the command from the user
         with open(filename, 'r') as f:
             lines = f.readlines()
         while True:
@@ -98,13 +103,15 @@ class Controller():
                     self.set("RING_BRIGHTNESS", arg)
                 elif cmd == "CMD_SET_TIMER_INTERVAL":
                     self.set("TIMER_INTERVAL", arg)
-
+            if loop:
                 foo = input("")  # wait for input
+            else:
+                break
 
 if __name__ == '__main__':
     ctrl = Controller(args.serial, args.baudrate)
     args = parser.parse_args()
-    t1 = threading.Thread(target=ctrl.writer, args=(args.input,))
+    t1 = threading.Thread(target=ctrl.writer, args=(args.input, args.loop,))
     t2 = threading.Thread(target=ctrl.reader)
     t1.start()
     t2.start()

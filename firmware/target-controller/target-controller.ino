@@ -139,9 +139,8 @@ void loop() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         bool status = targets[i]->update();
         if (status) {
-            Serial.print("Target "); 
-            Serial.print(i); 
-            Serial.print(" triggered\n");
+            Serial.write(RSP_HIT_STATUS);
+            Serial.write(status);
         }
     }
 }
