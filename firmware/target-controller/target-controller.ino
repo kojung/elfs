@@ -33,14 +33,14 @@ TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 void setup() {
     // enable serial
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB port only
     }
 
     // enable all targets by default
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->set_mode(TARGET_ENABLED);
+        targets[i]->set_mode(TARGET_DISABLED);
     }
 }
 
@@ -48,83 +48,92 @@ void loop() {
     if (Serial.available() > 0) {
         uint8_t opcode = Serial.read();
         uint8_t arg;
+        uint16_t value;
         switch(opcode) {
-            case CMD_SET_TARGET_ENABLE: {
+            case CMD_SET_TARGET_ENABLED:
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->set_mode(TARGET_ENABLED);
                 break;
-            }
-            case CMD_SET_TARGET_TIMED: {
+
+            case CMD_SET_TARGET_TIMED: 
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->set_mode(TARGET_TIMED);
                 break;
-            }
-            case CMD_SET_TARGET_DISABLED: {
+
+            case CMD_SET_TARGET_DISABLED: 
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->set_mode(TARGET_DISABLED);
                 break;
-            }
 
-            case CMD_SET_SENSOR_THRESHOLD: {
+            case CMD_SET_SENSOR_THRESHOLD:
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_sensor_threshold(arg);
+                    targets[i]->set_sensor_threshold(value);
                 }
                 break;
-            }
         
             case CMD_SET_TIMER_INTERVAL:
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_timer_interval(arg);
+                    targets[i]->set_timer_interval(value);
                 }
                 break;
 
             case CMD_SET_RING_BRIGHTNESS: 
                 while ( !Serial.available() ) { }
-                arg = Serial.read();
+                arg = Serial.read(); value = arg << 8;  // MSB
+                while ( !Serial.available() ) { }
+                arg = Serial.read(); value |= arg;      // LSB
                 for (uint8_t i=0; i < NUM_TARGETS; i++) {
-                    targets[i]->set_ring_brightness(arg);
+                    targets[i]->set_ring_brightness(value);
                 }
                 break;
 
-            case CMD_RUN_SELF_TEST: {
+            case CMD_RUN_SELF_TEST:
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 targets[arg]->run_self_test();
                 break;
-            }
-            case CMD_GET_SENSOR_THRESHOLD: {
-                uint16_t arg = targets[0]->get_sensor_threshold();
+
+            case CMD_GET_SENSOR_THRESHOLD:
+                value = targets[0]->get_sensor_threshold();
                 Serial.write(RSP_SENSOR_THRESHOLD);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
-            }
-            case CMD_GET_RING_BRIGHTNESS: {
-                uint16_t arg = targets[0]->get_ring_brightness();
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
+                break;
+
+            case CMD_GET_RING_BRIGHTNESS:
+                value = targets[0]->get_ring_brightness();
                 Serial.write(RSP_RING_BRIGHTNESS);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
-            }
-            case CMD_GET_TIMER_INTERVAL: {
-                uint16_t arg = targets[0]->get_timer_interval();
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
+                break;
+
+            case CMD_GET_TIMER_INTERVAL:
+                value = targets[0]->get_timer_interval();
                 Serial.write(RSP_TIMER_INTERVAL);
-                Serial.write((arg >> 8) & 0xFF);  // MSB
-                Serial.write(arg & 0xFF);         // LSB
-            }
-            case CMD_POLL_TARGET: {
+                Serial.write((value >> 8) & 0xFF);  // MSB
+                Serial.write(value & 0xFF);         // LSB
+                break;
+
+            case CMD_POLL_TARGET:
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
                 uint8_t state = targets[arg]->get_hit_state();
                 Serial.write(RSP_HIT_STATUS);
+                Serial.write(arg);
                 Serial.write(state);
                 break;
-            }
+
             default:
                 // unrecognized or unimplemented commands
                 break;
@@ -132,6 +141,11 @@ void loop() {
     }
 
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->update();
+        uint8_t status = targets[i]->update();
+        if (status) {
+            Serial.write(RSP_HIT_STATUS);
+            Serial.write(i);
+            Serial.write(status);
+        }
     }
 }

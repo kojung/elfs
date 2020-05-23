@@ -87,8 +87,13 @@ bool Target<LED, LDR, TRIGGER>::update() {
                 if (now - last_update_time_ > timer_interval_) {
                     led_counter_--;
                     set_color(led_counter_, CRGB::Green);
+                    last_update_time_ = now;
                 }
-                last_update_time_ = now;
+
+                // if timer expired, disable the target
+                if (led_counter_ == 0) {
+                    set_mode(TARGET_DISABLED);
+                }
             }
         }
     }
@@ -101,15 +106,14 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
     // trigger actuator
     digitalWrite(TRIGGER, HIGH);
     // blink red
-    for(int i=0; i<20; i++) {
+    for(int i=0; i<10; i++) {
         set_color(TARGET_NUM_LEDS, CRGB::Red);
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
         delay(30);
-        if (i==5) {
-            digitalWrite(TRIGGER, LOW);
-        }
+        digitalWrite(TRIGGER, LOW);
     }
+    set_color(TARGET_NUM_LEDS, CRGB::Red);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>

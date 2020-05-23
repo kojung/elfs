@@ -36,3 +36,7 @@ Any raspberry pi system should work, but we recommend a RPI4B with at least 2GB 
 | --------------------------------- | -------- | ------------------------------------------------------------ |
 | Dual output 5V / 12V power supply | 1        | [Amazon](https://www.amazon.com/dp/B07RT54H9V/ref=cm_sw_em_r_mt_dp_U_pAiWEbQV0GEES) |
 
+## Schematics
+
+TODO
+

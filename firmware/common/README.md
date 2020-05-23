@@ -14,7 +14,7 @@ The command protocol consists of a 1-byte `OPCODE` followed by zero or one 1-byt
 
 | OPCODE [1 byte]          | ARG [1 byte] | Meaning                            |
 | ------------------------ | ------------ | ---------------------------------- |
-| CMD_SET_TARGET_ENABLE    | target_id    | Enable the target                  |
+| CMD_SET_TARGET_ENABLED   | target_id    | Enable the target                  |
 | CMD_SET_TARGET_TIMED     | target_id    | Enable the target in timed mode    |
 | CMD_SET_TARGET_DISABLED  | target_id    | Disable the target                 |
 | CMD_RUN_SELF_TEST        | target_id    | Run target self-test sequence      |
@@ -33,8 +33,8 @@ See [cmd.h](cmd.h) header file for `OPCODE` encoding.
 The response protocol is composed of 3 fields:
 
 * 1-byte OPCODE
-* 1-byte TARGET ID
-* 1-byte value
+* 1-byte ARG1
+* 1-byte ARG2
 
 | OPCODE [1 byte]      | ARG1 [1-byte]      | ARG2 [1-byte]      | Meaning                                                      |
 | -------------------- | ------------------ | ------------------ | ------------------------------------------------------------ |
