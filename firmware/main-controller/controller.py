@@ -3,14 +3,16 @@
 import threading
 import argparse
 import serial
+import re
 import time
+
 import cmd
 import rsp
 
 parser = argparse.ArgumentParser(description='ELFS main controller',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
-parser.add_argument("-l", "--loop", type=bool, default=False, help="Replay the input file in a loop")
+parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
 parser.add_argument("-b", "--baudrate", default=115200, help="Serial port baudrate")
 parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
 args = parser.parse_args()
@@ -20,6 +22,7 @@ class Controller():
         """Constructor"""
         self.cmd = cmd.Cmd()
         self.rsp = rsp.Rsp()
+        self.terminate = False
         self.ser = ser = serial.Serial(port=port, baudrate=baurate, parity=serial.PARITY_NONE,
                                        stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=None)
 
@@ -63,20 +66,44 @@ class Controller():
 
     def reader(self):
         """method for reader thread"""
-        while True:
-            data = self.ser.read().decode('utf-8')
-            print(data, end="")
+        while not self.terminate:
+            if self.ser.in_waiting:
+                data = int.from_bytes(self.ser.read(), byteorder='big')
+                if data == self.rsp["RSP_HIT_STATUS"]:
+                    tid = int.from_bytes(self.ser.read(), byteorder='big')
+                    val = int.from_bytes(self.ser.read(), byteorder='big')
+                    print(f"RSP_HIT_STATUS {tid} {val}")
+                elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
+                    msb = int.from_bytes(self.ser.read(), byteorder='big')
+                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    val = msb << 8 | lsb
+                    print(f"RSP_SENSOR_THRESHOLD {val}")
+                elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
+                    msb = int.from_bytes(self.ser.read(), byteorder='big')
+                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    val = msb << 8 | lsb
+                    print(f"RSP_RING_BRIGHTNESS {val}")
+                elif data == self.rsp["RSP_TIMER_INTERVAL"]:
+                    msb = int.from_bytes(self.ser.read(), byteorder='big')
+                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    val = msb << 8 | lsb
+                    print(f"RSP_TIMER_INTERVAL {val}")
+                else:
+                    # ignore
+                    print(f"unrecognized byte: {data}")
+                    pass
+            else:
+                time.sleep(0)  # yield
+        print("INFO: End of read thread")
 
     def writer(self, filename, loop=False):
         """method for reader thread"""
-        # wait for serial port to be ready
-        time.sleep(2)
-
-        # execute the command from the user
-        with open(filename, 'r') as f:
-            lines = f.readlines()
-        while True:
+        def execute(lines):
             for line in lines:
+                # skip comments and empty lines
+                if re.search(r'^\s*#', line) or re.search(r'^\s*$', line):
+                    continue
+                # parse tokens
                 tokens = line.split()
                 cmd = tokens[0]
                 if len(tokens) > 1:
@@ -103,10 +130,24 @@ class Controller():
                     self.set("RING_BRIGHTNESS", arg)
                 elif cmd == "CMD_SET_TIMER_INTERVAL":
                     self.set("TIMER_INTERVAL", arg)
-            if loop:
-                foo = input("")  # wait for input
-            else:
-                break
+
+        # wait for serial port to be ready
+        time.sleep(2)
+
+        # execute the command from the user
+        with open(filename, 'r') as f:
+            lines = [l.strip() for l in f.readlines()]
+        execute(lines)
+
+        # loop based on user input
+        if loop:
+            while not self.terminate:
+                # non-blocking user input
+                import sys, select
+                while sys.stdin in select.select([sys.stdin], [], [], 2)[0]:
+                    ignore = sys.stdin.readline()
+                    execute(lines)
+        print("INFO: End of writer thread")
 
 if __name__ == '__main__':
     ctrl = Controller(args.serial, args.baudrate)
@@ -115,5 +156,11 @@ if __name__ == '__main__':
     t2 = threading.Thread(target=ctrl.reader)
     t1.start()
     t2.start()
-    t1.join()
-    t2.join()
+    try:
+        t1.join()
+        t2.join()
+    except KeyboardInterrupt:
+        # terminate threads gracefully
+        ctrl.terminate = True
+        t1.join()
+        t2.join()

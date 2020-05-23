@@ -125,9 +125,10 @@ void loop() {
             case CMD_POLL_TARGET:
                 while ( !Serial.available() ) { }
                 arg = Serial.read();
-                value = targets[arg]->get_hit_state();
+                uint8_t state = targets[arg]->get_hit_state();
                 Serial.write(RSP_HIT_STATUS);
-                Serial.write(value);
+                Serial.write(arg);
+                Serial.write(state);
                 break;
 
             default:
@@ -137,9 +138,10 @@ void loop() {
     }
 
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        bool status = targets[i]->update();
+        uint8_t status = targets[i]->update();
         if (status) {
             Serial.write(RSP_HIT_STATUS);
+            Serial.write(i);
             Serial.write(status);
         }
     }
