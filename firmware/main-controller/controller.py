@@ -13,12 +13,12 @@ parser = argparse.ArgumentParser(description='ELFS main controller',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
 parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
-parser.add_argument("-b", "--baudrate", default=115200, help="Serial port baudrate")
+parser.add_argument("-b", "--baudrate", default=9600, help="Serial port baudrate")
 parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
 args = parser.parse_args()
 
 class Controller():
-    def __init__(self, port="/dev/ttyUSB0", baurate=115200):
+    def __init__(self, port, baurate):
         """Constructor"""
         self.cmd = cmd.Cmd()
         self.rsp = rsp.Rsp()

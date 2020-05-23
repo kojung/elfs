@@ -33,7 +33,7 @@ TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 void setup() {
     // enable serial
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB port only
     }
@@ -109,18 +109,21 @@ void loop() {
                 Serial.write(RSP_SENSOR_THRESHOLD);
                 Serial.write((value >> 8) & 0xFF);  // MSB
                 Serial.write(value & 0xFF);         // LSB
+                break;
 
             case CMD_GET_RING_BRIGHTNESS:
                 value = targets[0]->get_ring_brightness();
                 Serial.write(RSP_RING_BRIGHTNESS);
                 Serial.write((value >> 8) & 0xFF);  // MSB
                 Serial.write(value & 0xFF);         // LSB
+                break;
 
             case CMD_GET_TIMER_INTERVAL:
                 value = targets[0]->get_timer_interval();
                 Serial.write(RSP_TIMER_INTERVAL);
                 Serial.write((value >> 8) & 0xFF);  // MSB
                 Serial.write(value & 0xFF);         // LSB
+                break;
 
             case CMD_POLL_TARGET:
                 while ( !Serial.available() ) { }
