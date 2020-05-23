@@ -150,6 +150,7 @@ class Controller():
         print("INFO: End of writer thread")
 
 if __name__ == '__main__':
+    NUM_OF_TARGETS = 4
     ctrl = Controller(args.serial, args.baudrate)
     args = parser.parse_args()
     t1 = threading.Thread(target=ctrl.writer, args=(args.input, args.loop,))
@@ -164,3 +165,5 @@ if __name__ == '__main__':
         ctrl.terminate = True
         t1.join()
         t2.join()
+        for i in range(NUM_OF_TARGETS):
+            ctrl.set_target(i, "DISABLED")
