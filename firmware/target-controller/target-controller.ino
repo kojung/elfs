@@ -23,10 +23,11 @@
 
 #define NUM_TARGETS (4)
 
-Target<2, A0, 6> t0;
-Target<3, A1, 7> t1;
-Target<4, A2, 8> t2;
-Target<5, A3, 9> t3;
+// Targets pins: LED, LDR, TRIGGER
+Target<8,  A0, 2> t0;
+Target<9,  A1, 3> t1;
+Target<10, A2, 4> t2;
+Target<11, A3, 5> t3;
 
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
@@ -38,7 +39,7 @@ void setup() {
         ; // wait for serial port to connect. Needed for native USB port only
     }
 
-    // enable all targets by default
+    // disable all targets by default
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_mode(TARGET_DISABLED);
     }

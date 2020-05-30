@@ -46,6 +46,12 @@ class Target : public TargetBase {
     /** Run selftest */
     void run_self_test() override;
 
+    /** enable actuator */
+    void enable_actuator() override;
+
+    /** disable actuator */
+    void disable_actuator() override;
+
  private:
     // provide feedback for hit
     void hit_feedback();
@@ -62,6 +68,7 @@ Target<LED, LDR, TRIGGER>::Target() {
     pinMode(LED,     OUTPUT);
     pinMode(LDR,     INPUT);  // analog
     pinMode(TRIGGER, OUTPUT);
+    disable_actuator();
 
     // create ring of led
     controller_ = &FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
@@ -104,14 +111,14 @@ bool Target<LED, LDR, TRIGGER>::update() {
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::hit_feedback() {
     // trigger actuator
-    digitalWrite(TRIGGER, HIGH);
+    enable_actuator();
     // blink red
     for(int i=0; i<10; i++) {
         set_color(TARGET_NUM_LEDS, CRGB::Red);
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
         delay(30);
-        digitalWrite(TRIGGER, LOW);
+        disable_actuator();
     }
     set_color(TARGET_NUM_LEDS, CRGB::Red);
 }
@@ -126,7 +133,18 @@ void Target<LED, LDR, TRIGGER>::run_self_test() {
     set_color(TARGET_NUM_LEDS, CRGB::Black);
 
     // exercise trigger
-    digitalWrite(TRIGGER, HIGH);
+    enable_actuator();
     delay(1000);
-    digitalWrite(TRIGGER, LOW);
+    disable_actuator();
 }
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::enable_actuator() {
+    digitalWrite(TRIGGER, LOW);  // active low relay
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::disable_actuator() {
+    digitalWrite(TRIGGER, HIGH);  // active low relay
+}
+

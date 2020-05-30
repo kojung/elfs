@@ -47,6 +47,12 @@ class TargetBase {
     /** Run self test */
     virtual void run_self_test();
 
+    /** enable actuator */
+    virtual void enable_actuator();
+
+    /** disable actuator */
+    virtual void disable_actuator();
+
     /** Set target mode
     * @param mode Target mode
     */
