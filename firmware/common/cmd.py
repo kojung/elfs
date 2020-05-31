@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.6
 
 # 
-# Enhanced Laser Firing System - ELFS
+# Extensible Laser Firing System - ELFS
 # Copyright (C) 2020 Jung Ko <kojung@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
