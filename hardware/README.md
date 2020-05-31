@@ -11,6 +11,7 @@
 | Neopixel Ring 16 x 5050 RGB LED with Integrated Drivers | 1        | [Adafruit](https://www.adafruit.com/product/1463)            |
 | Large Photoresistor - 20mm                              | 1        | [Tinkersphere](https://tinkersphere.com/sensors/2185-large-photoresistor-20mm.html) |
 | 1K resistor                                             | 1        |                                                              |
+| 10K resistor                                            | 1        |                                                              |
 | Actuator                                                | 1        | [Amazon](https://www.amazon.com/dp/B07FY9KXB5/ref=cm_sw_em_r_mt_dp_U_GsiWEbMZS77H9) |
 | 1/4" bearings                                           | 1        |                                                              |
 | Male/Female connector                                   | 1        |                                                              |
@@ -42,7 +43,9 @@ Any raspberry pi system should work, but we recommend a RPI4B with at least 2GB 
 
 # Schematics
 
-TODO
+File [system schematic](system_schematic.pdf) shows the electrical connection at the system level. 
+
+File [target schematic](target_schematic.pdf) shows the electrical connection at the target level.
 
 # Plans
 
