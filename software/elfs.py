@@ -7,7 +7,6 @@ def get_message():
     '''this could be any function that blocks until data is ready'''
     time.sleep(1.0)
     s = time.ctime(time.time())
-    print(f"Returning message {s}")
     return s
 
 @app.route('/')
