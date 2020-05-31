@@ -38,6 +38,7 @@ void TargetBase::set_mode(target_mode_t mode) {
     } else if (mode_ == TARGET_DISABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Black);
     }
+    disable_actuator();
 }
 
 bool TargetBase::get_hit_state() {
