@@ -26,7 +26,9 @@ class Rsp(dict):
             RSP_HIT_STATUS
             RSP_SENSOR_THRESHOLD
             RSP_RING_BRIGHTNESS
-            RSP_TIMER_INTERVAL""".split()
+            RSP_TIMER_INTERVAL
+            RSP_DEBUG_START
+            RSP_DEBUG_END""".split()
         for idx, opcode in enumerate(opcodes):
             self[opcode] = 0x80 + idx
 

@@ -45,6 +45,12 @@ void setup() {
     }
 }
 
+void debug(const String msg) {
+    Serial.write(RSP_DEBUG_START);
+    Serial.print(msg);
+    Serial.write(RSP_DEBUG_END);
+}
+
 void loop() {
     if (Serial.available() > 0) {
         uint8_t opcode = Serial.read();
@@ -144,6 +150,7 @@ void loop() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         uint8_t status = targets[i]->update();
         if (status) {
+            debug("Target " + String(i) + " triggered");
             Serial.write(RSP_HIT_STATUS);
             Serial.write(i);
             Serial.write(status);
