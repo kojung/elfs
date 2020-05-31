@@ -140,11 +140,11 @@ void Target<LED, LDR, TRIGGER>::run_self_test() {
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::enable_actuator() {
-    digitalWrite(TRIGGER, LOW);  // active low relay
+    digitalWrite(TRIGGER, HIGH);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::disable_actuator() {
-    digitalWrite(TRIGGER, HIGH);  // active low relay
+    digitalWrite(TRIGGER, LOW);
 }
 
