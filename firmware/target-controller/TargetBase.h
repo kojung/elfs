@@ -1,5 +1,5 @@
 /*
-* Enhanced Laser Firing System - ELFS
+* Extensible Laser Firing System - ELFS
 * Copyright (C) 2020 Jung Ko <kojung@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
@@ -40,12 +40,18 @@ class TargetBase {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return True if hit state changed
+    * @return LDR value that triggered the target, -1 if not triggered
     */
-    virtual bool update();
+    virtual int update();
 
     /** Run self test */
     virtual void run_self_test();
+
+    /** enable actuator */
+    virtual void enable_actuator();
+
+    /** disable actuator */
+    virtual void disable_actuator();
 
     /** Set target mode
     * @param mode Target mode

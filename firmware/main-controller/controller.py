@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 
 import threading
 import argparse
@@ -88,6 +88,15 @@ class Controller():
                     lsb = int.from_bytes(self.ser.read(), byteorder='big')
                     val = msb << 8 | lsb
                     print(f"RSP_TIMER_INTERVAL {val}")
+                elif data == self.rsp["RSP_DEBUG_START"]:
+                    msg = ""
+                    while True:
+                        data = int.from_bytes(self.ser.read(), byteorder='big')
+                        if data == self.rsp["RSP_DEBUG_END"]:
+                            print(f"DEBUG: {msg}")
+                            break
+                        else:
+                            msg += chr(data)
                 else:
                     # ignore
                     print(f"unrecognized byte: {data}")

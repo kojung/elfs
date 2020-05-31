@@ -1,5 +1,5 @@
 /*
-* Enhanced Laser Firing System - ELFS
+* Extensible Laser Firing System - ELFS
 * Copyright (C) 2020 Jung Ko <kojung@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
@@ -39,12 +39,18 @@ class Target : public TargetBase {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return True if hit state changed
+    * @return value that triggered the target, -1 if target was not triggered
     */
-    bool update() override;
+    int update() override;
 
     /** Run selftest */
     void run_self_test() override;
+
+    /** enable actuator */
+    void enable_actuator() override;
+
+    /** disable actuator */
+    void disable_actuator() override;
 
  private:
     // provide feedback for hit
@@ -62,6 +68,7 @@ Target<LED, LDR, TRIGGER>::Target() {
     pinMode(LED,     OUTPUT);
     pinMode(LDR,     INPUT);  // analog
     pinMode(TRIGGER, OUTPUT);
+    disable_actuator();
 
     // create ring of led
     controller_ = &FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
@@ -73,13 +80,14 @@ Target<LED, LDR, TRIGGER>::~Target() {
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
-bool Target<LED, LDR, TRIGGER>::update() {
+int Target<LED, LDR, TRIGGER>::update() {
     // update only if target is enabled AND hasn't been hit yet
     if (mode_ != TARGET_DISABLED && !hit_state_) {
-        if (analogRead(LDR) < sensor_threshold_) {
+        int ldr = analogRead(LDR);
+        if (ldr < sensor_threshold_) {
             hit_state_ = true;
             hit_feedback();
-            return true;
+            return ldr;
         } else {
             // update timer?
             if (mode_ == TARGET_TIMED && led_counter_ > 0) {
@@ -98,20 +106,20 @@ bool Target<LED, LDR, TRIGGER>::update() {
         }
     }
     // no state changes
-    return false;
+    return -1;
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::hit_feedback() {
     // trigger actuator
-    digitalWrite(TRIGGER, HIGH);
+    enable_actuator();
     // blink red
     for(int i=0; i<10; i++) {
         set_color(TARGET_NUM_LEDS, CRGB::Red);
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
         delay(30);
-        digitalWrite(TRIGGER, LOW);
+        disable_actuator();
     }
     set_color(TARGET_NUM_LEDS, CRGB::Red);
 }
@@ -119,14 +127,25 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::run_self_test() {
     // exercise all LEDs in white
-    for(int i=0; i<TARGET_NUM_LEDS; i++) {
+    for(int i=1; i<=TARGET_NUM_LEDS; i++) {
         set_color(i, CRGB::White);
         delay(50);
     }
     set_color(TARGET_NUM_LEDS, CRGB::Black);
 
     // exercise trigger
-    digitalWrite(TRIGGER, HIGH);
+    enable_actuator();
     delay(1000);
+    disable_actuator();
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::enable_actuator() {
+    digitalWrite(TRIGGER, HIGH);
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::disable_actuator() {
     digitalWrite(TRIGGER, LOW);
 }
+

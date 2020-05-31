@@ -1,6 +1,6 @@
-# Enhanced Laser Firing System
+# Extensible Laser Firing System
 
-Enhanced Laser Firing System (ELFS) is an open source project intended to make firing practice fun and affordable at home. The project consists of one or more light dependent resistors acting as shooting targets. LED, actuators and a GUI act as feedback mechanism.
+Extensible Laser Firing System (ELFS) is an open source project intended to make firing practice fun and affordable at home. The project consists of one or more light dependent resistors acting as shooting targets. LED, actuators and a GUI act as feedback mechanism.
 
 ## Demo Video
 

@@ -1,5 +1,5 @@
 /*
-* Enhanced Laser Firing System - ELFS
+* Extensible Laser Firing System - ELFS
 * Copyright (C) 2020 Jung Ko <kojung@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
@@ -23,10 +23,11 @@
 
 #define NUM_TARGETS (4)
 
-Target<2, A0, 6> t0;
-Target<3, A1, 7> t1;
-Target<4, A2, 8> t2;
-Target<5, A3, 9> t3;
+// Targets pins: LED, LDR, TRIGGER
+Target<8,  A0, 2> t0;
+Target<9,  A1, 3> t1;
+Target<10, A2, 4> t2;
+Target<11, A3, 5> t3;
 
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
@@ -38,10 +39,16 @@ void setup() {
         ; // wait for serial port to connect. Needed for native USB port only
     }
 
-    // enable all targets by default
+    // disable all targets by default
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_mode(TARGET_DISABLED);
     }
+}
+
+void debug(const String msg) {
+    Serial.write(RSP_DEBUG_START);
+    Serial.print(msg);
+    Serial.write(RSP_DEBUG_END);
 }
 
 void loop() {
@@ -141,11 +148,12 @@ void loop() {
     }
 
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        uint8_t status = targets[i]->update();
-        if (status) {
+        int value = targets[i]->update();
+        if (value >= 0) {
+            // debug("Target " + String(i) + " triggered with value " + String(value));
             Serial.write(RSP_HIT_STATUS);
             Serial.write(i);
-            Serial.write(status);
+            Serial.write(1);
         }
     }
 }

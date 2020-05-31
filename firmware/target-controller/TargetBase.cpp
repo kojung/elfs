@@ -1,5 +1,5 @@
 /*
-* Enhanced Laser Firing System - ELFS
+* Extensible Laser Firing System - ELFS
 * Copyright (C) 2020 Jung Ko <kojung@gmail.com>
 * 
 * This program is free software: you can redistribute it and/or modify
@@ -38,6 +38,7 @@ void TargetBase::set_mode(target_mode_t mode) {
     } else if (mode_ == TARGET_DISABLED) {
         set_color(TARGET_NUM_LEDS, CRGB::Black);
     }
+    disable_actuator();
 }
 
 bool TargetBase::get_hit_state() {
