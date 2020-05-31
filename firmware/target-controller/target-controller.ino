@@ -150,7 +150,7 @@ void loop() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         int value = targets[i]->update();
         if (value >= 0) {
-            debug("Target " + String(i) + " triggered with value" + String(value));
+            // debug("Target " + String(i) + " triggered with value " + String(value));
             Serial.write(RSP_HIT_STATUS);
             Serial.write(i);
             Serial.write(1);
