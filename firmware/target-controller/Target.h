@@ -39,9 +39,9 @@ class Target : public TargetBase {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return True if hit state changed
+    * @return value that triggered the target, -1 if target was not triggered
     */
-    bool update() override;
+    int update() override;
 
     /** Run selftest */
     void run_self_test() override;
@@ -80,13 +80,14 @@ Target<LED, LDR, TRIGGER>::~Target() {
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
-bool Target<LED, LDR, TRIGGER>::update() {
+int Target<LED, LDR, TRIGGER>::update() {
     // update only if target is enabled AND hasn't been hit yet
     if (mode_ != TARGET_DISABLED && !hit_state_) {
-        if (analogRead(LDR) < sensor_threshold_) {
+        int ldr = analogRead(LDR);
+        if (ldr < sensor_threshold_) {
             hit_state_ = true;
             hit_feedback();
-            return true;
+            return ldr;
         } else {
             // update timer?
             if (mode_ == TARGET_TIMED && led_counter_ > 0) {
@@ -105,7 +106,7 @@ bool Target<LED, LDR, TRIGGER>::update() {
         }
     }
     // no state changes
-    return false;
+    return -1;
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
