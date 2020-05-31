@@ -126,7 +126,7 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::run_self_test() {
     // exercise all LEDs in white
-    for(int i=0; i<TARGET_NUM_LEDS; i++) {
+    for(int i=1; i<=TARGET_NUM_LEDS; i++) {
         set_color(i, CRGB::White);
         delay(50);
     }
