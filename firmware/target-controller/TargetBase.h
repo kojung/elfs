@@ -40,7 +40,6 @@ class TargetBase {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return LDR value that triggered the target, -1 if not triggered
     */
     virtual int update();
 

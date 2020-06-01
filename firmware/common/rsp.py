@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 
 # 
 # Extensible Laser Firing System - ELFS
@@ -28,7 +28,8 @@ class Rsp(dict):
             RSP_RING_BRIGHTNESS
             RSP_TIMER_INTERVAL
             RSP_DEBUG_START
-            RSP_DEBUG_END""".split()
+            RSP_DEBUG_END
+            RSP_COUNTDOWN_EXPIRED""".split()
         for idx, opcode in enumerate(opcodes):
             self[opcode] = 0x80 + idx
 

@@ -73,6 +73,10 @@ class Controller():
                     tid = int.from_bytes(self.ser.read(), byteorder='big')
                     val = int.from_bytes(self.ser.read(), byteorder='big')
                     print(f"RSP_HIT_STATUS {tid} {val}")
+                elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
+                    tid = int.from_bytes(self.ser.read(), byteorder='big')
+                    val = int.from_bytes(self.ser.read(), byteorder='big')
+                    print(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
                 elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
                     msb = int.from_bytes(self.ser.read(), byteorder='big')
                     lsb = int.from_bytes(self.ser.read(), byteorder='big')

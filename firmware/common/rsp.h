@@ -8,3 +8,4 @@
 #define RSP_TIMER_INTERVAL (0x83)
 #define RSP_DEBUG_START (0x84)
 #define RSP_DEBUG_END (0x85)
+#define RSP_COUNTDOWN_EXPIRED (0x86)
