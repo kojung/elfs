@@ -10,14 +10,6 @@ from queue import Queue
 import cmd
 import rsp
 
-parser = argparse.ArgumentParser(description='ELFS main controller',
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
-parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
-parser.add_argument("-b", "--baudrate", default=9600, help="Serial port baudrate")
-parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
-args = parser.parse_args()
-
 class Controller():
     def __init__(self, port, baurate):
         """Constructor"""
@@ -163,7 +155,13 @@ class Controller():
         print("INFO: End of writer thread")
 
 if __name__ == '__main__':
-    NUM_OF_TARGETS = 4
+    parser = argparse.ArgumentParser(description='ELFS main controller',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
+    parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
+    parser.add_argument("-b", "--baudrate", default=9600, help="Serial port baudrate")
+    parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
+    args = parser.parse_args()
     ctrl = Controller(args.serial, args.baudrate)
     args = parser.parse_args()
     queue = Queue()
@@ -180,5 +178,6 @@ if __name__ == '__main__':
         ctrl.terminate = True
         t1.join()
         t2.join()
+        NUM_OF_TARGETS = 4
         for i in range(NUM_OF_TARGETS):
             ctrl.set_target(i, "DISABLED")

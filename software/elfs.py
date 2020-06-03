@@ -1,7 +1,16 @@
 from flask import Flask, render_template, Response
+from queue import Queue
 import time
 
-app = Flask(__name__)
+from controller import Controller
+
+app = Flask("ELFS")
+
+# instantiate controller
+ctrl = Controller()
+
+# use this queue to communicate with the controller
+queue = Queue()
 
 def get_message():
     '''this could be any function that blocks until data is ready'''
@@ -10,11 +19,10 @@ def get_message():
     return s
 
 @app.route('/')
-@app.route('/index')
 def index():
     return render_template('index.html')
 
-@app.route('/controller')
+@app.route('/elfs')
 def controller():
     def eventStream():
         while True:
