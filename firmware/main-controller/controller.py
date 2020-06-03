@@ -5,7 +5,7 @@ import argparse
 import serial
 import re
 import time
-from Queue import Queue
+from queue import Queue
 
 import cmd
 import rsp
@@ -168,15 +168,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
     queue = Queue()
     t1 = threading.Thread(target=ctrl.writer, args=(args.input, args.loop,))
-    t2 = threading.Thread(target=ctrl.reader, args=(queue))
+    t2 = threading.Thread(target=ctrl.reader, args=[queue])
     t1.start()
     t2.start()
-    while True:
-        print(queue.get())
-        
     try:
-        t1.join()
-        t2.join()
+        while True:
+            print(queue.get())
+
     except KeyboardInterrupt:
         # terminate threads gracefully
         ctrl.terminate = True
