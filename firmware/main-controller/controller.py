@@ -5,6 +5,7 @@ import argparse
 import serial
 import re
 import time
+from Queue import Queue
 
 import cmd
 import rsp
@@ -64,7 +65,7 @@ class Controller():
         payload = bytearray([opcode_value, msb, lsb])
         self.ser.write(payload)
 
-    def reader(self):
+    def reader(self, queue):
         """method for reader thread"""
         while not self.terminate:
             if self.ser.in_waiting:
@@ -72,38 +73,37 @@ class Controller():
                 if data == self.rsp["RSP_HIT_STATUS"]:
                     tid = int.from_bytes(self.ser.read(), byteorder='big')
                     val = int.from_bytes(self.ser.read(), byteorder='big')
-                    print(f"RSP_HIT_STATUS {tid} {val}")
+                    queue.put(f"RSP_HIT_STATUS {tid} {val}")
                 elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
                     tid = int.from_bytes(self.ser.read(), byteorder='big')
                     val = int.from_bytes(self.ser.read(), byteorder='big')
-                    print(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
+                    queue.put(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
                 elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
                     msb = int.from_bytes(self.ser.read(), byteorder='big')
                     lsb = int.from_bytes(self.ser.read(), byteorder='big')
                     val = msb << 8 | lsb
-                    print(f"RSP_SENSOR_THRESHOLD {val}")
+                    queue.put(f"RSP_SENSOR_THRESHOLD {val}")
                 elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
                     msb = int.from_bytes(self.ser.read(), byteorder='big')
                     lsb = int.from_bytes(self.ser.read(), byteorder='big')
                     val = msb << 8 | lsb
-                    print(f"RSP_RING_BRIGHTNESS {val}")
+                    queue.put(f"RSP_RING_BRIGHTNESS {val}")
                 elif data == self.rsp["RSP_TIMER_INTERVAL"]:
                     msb = int.from_bytes(self.ser.read(), byteorder='big')
                     lsb = int.from_bytes(self.ser.read(), byteorder='big')
                     val = msb << 8 | lsb
-                    print(f"RSP_TIMER_INTERVAL {val}")
+                    queue.put(f"RSP_TIMER_INTERVAL {val}")
                 elif data == self.rsp["RSP_DEBUG_START"]:
                     msg = ""
                     while True:
                         data = int.from_bytes(self.ser.read(), byteorder='big')
                         if data == self.rsp["RSP_DEBUG_END"]:
-                            print(f"DEBUG: {msg}")
+                            queue.put(f"DEBUG: {msg}")
                             break
                         else:
                             msg += chr(data)
                 else:
                     # ignore
-                    print(f"unrecognized byte: {data}")
                     pass
             else:
                 time.sleep(0)  # yield
@@ -166,10 +166,14 @@ if __name__ == '__main__':
     NUM_OF_TARGETS = 4
     ctrl = Controller(args.serial, args.baudrate)
     args = parser.parse_args()
+    queue = Queue()
     t1 = threading.Thread(target=ctrl.writer, args=(args.input, args.loop,))
-    t2 = threading.Thread(target=ctrl.reader)
+    t2 = threading.Thread(target=ctrl.reader, args=(queue))
     t1.start()
     t2.start()
+    while True:
+        print(queue.get())
+        
     try:
         t1.join()
         t2.join()
