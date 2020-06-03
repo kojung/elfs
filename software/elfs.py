@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
+
 from flask import Flask, render_template, Response
-import Queue
+import queue
 import time
 import threading
 import atexit
@@ -15,18 +17,18 @@ NUM_OF_TARGETS = 4
 ctrl = Controller(SERIAL, BAUDRATE)
 
 # use this queue to communicate with the controller
-queue  = Queue.Queue()
+queue  = queue.Queue()
 reader = threading.Thread(target=ctrl.reader, args=[queue])
 reader.start()
 
 def shutdown_controller():
-    """shutdown the controller gracefully"""
-    print("Shutting down controller")
-    ctrl.terminate = True
-    reader.join()
-    NUM_OF_TARGETS = 4
-    for i in range(NUM_OF_TARGETS):
-        ctrl.set_target(i, "DISABLED")
+   # """shutdown the controller gracefully"""
+   print("INFO: Shutting down controller")
+   ctrl.terminate = True
+   reader.join()
+   NUM_OF_TARGETS = 4
+   for i in range(NUM_OF_TARGETS):
+       ctrl.set_target(i, "DISABLED")
     
 def get_message():
     """this could be any function that blocks until data is ready"""
@@ -45,4 +47,6 @@ def controller():
             yield 'data: {}\n\n'.format(get_message())
     return Response(eventStream(), mimetype="text/event-stream")
 
-atexit.register(xxxhutdown_controller)
+atexit.register(shutdown_controller)
+app.run()
+
