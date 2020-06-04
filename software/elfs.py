@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask, render_template, Response
+from flask_bootstrap import Bootstrap, StaticCDN
 import queue
 import time
 import threading
@@ -9,6 +10,10 @@ import atexit
 from controller import Controller
 
 app = Flask("ELFS")
+
+# Bootstrap
+Bootstrap(app)
+app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 
 # instantiate controller
 SERIAL         = '/dev/ttyUSB0'
@@ -32,7 +37,9 @@ def shutdown_controller():
     
 def get_message():
     """this could be any function that blocks until data is ready"""
-    return queue.get()
+    # return queue.get()
+    time.sleep(1.0)
+    s = time.ctime(time.time())
     return s
 
 @app.route('/')

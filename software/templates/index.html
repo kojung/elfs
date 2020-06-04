@@ -1,16 +1,23 @@
-<html>
-<head>
-<script language="JavaScript">
-function SSE() {
-    var targetContainer = document.getElementById("target_div");
-    var eventSource = new EventSource("/controller")
-    eventSource.onmessage = function(e) {
-        targetContainer.innerHTML = e.data;
-    };
-}
-</script>
-</head>
-<body onload="SSE()">
-    <div id="target_div">Watch this space...</div>
-</body>
-</html>
+{% extends "bootstrap/base.html" %}
+{% block title %}This is an example page{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script language="JavaScript">
+    function SSE() {
+        var targetContainer = document.getElementById("target_div");
+        var eventSource = new EventSource("/controller")
+        eventSource.onmessage = function(e) {
+            targetContainer.innerHTML = e.data;
+        };
+    }
+    $(window).on('load', SSE());  
+    </script>
+{% endblock %}
+
+{% block content %}
+<h1>Hello, Bootstrap 2</h1>
+<div id="target_div">Watch this space...</div>
+
+{% endblock %}
+
