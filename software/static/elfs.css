@@ -13,6 +13,27 @@
     font-size: 300%;
 }
 
+.elfs-button {
+    width: 100%;
+    font-size: 400%;
+}
+
+.elfs-button-start {
+    background-color: green;
+}
+
+.elfs-button-stop {
+    background-color: red;
+}
+
+.elfs-timer {
+    font-size: 400%;
+}
+
+.elfs-score {
+    font-size: 400%;
+}
+
 body {
     padding-left: 20px;
     padding-right: 20px;

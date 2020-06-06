@@ -35,12 +35,11 @@ def shutdown_controller():
    for i in range(NUM_OF_TARGETS):
        ctrl.set_target(i, "DISABLED")
     
-def get_message():
+def get_message(count):
     """this could be any function that blocks until data is ready"""
     # return queue.get()
     time.sleep(1.0)
-    s = time.ctime(time.time())
-    return s
+    return count + 1
 
 @app.route('/')
 def index():
@@ -49,9 +48,11 @@ def index():
 @app.route('/controller')
 def controller():
     def eventStream():
+        count=0
         while True:
             # wait for source data to be available, then push it
-            yield 'data: {}\n\n'.format(get_message())
+            count = get_message(count)
+            yield 'data: {}\n\n'.format(count)
     return Response(eventStream(), mimetype="text/event-stream")
 
 atexit.register(shutdown_controller)

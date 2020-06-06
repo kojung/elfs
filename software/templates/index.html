@@ -12,10 +12,10 @@ Extensible Laser Firing System
 {{super()}}
 <script language="JavaScript">
 function SSE() {
-    var targetContainer = document.getElementById("target_div");
+    var timerContainer = document.getElementById("timer");
     var eventSource = new EventSource("/controller")
     eventSource.onmessage = function(e) {
-        targetContainer.innerHTML = e.data;
+        timer.innerHTML = e.data;
     };
 }
 $(window).on('load', SSE());  
@@ -54,18 +54,32 @@ $(window).on('load', function() {
 
 <div class="tab-content">
     <div id="practice-content" class="tab-pane fade in active">
-        Practice mode
+        Just practice
     </div>
       
     <div id="timed-content" class="tab-pane fade in">
-        Timed mode
+        Hit as many targets as possible within an allocated time
     </div>
 
     <div id="countdown-content" class="tab-pane fade in">
-        Count down mode
+        Each target has a countdown timer
     </div>
 </div>
-<div id="target_div">Watch this space...</div>
+
+<div class="row">
+    <div class="col-sm-4"><div class="col-sm-12 align-middle text-center">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default elfs-button elfs-button-start">Start</button>
+            <button type="button" class="btn btn-default elfs-button elfs-button-stop">Stop</button>
+        </div>
+    </div></div>
+    <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-timer">
+        Timer<div id="timer">00:00</div>
+    </div></div>
+    <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-score">
+        Score<div id="score">0</div>
+    </div></div>
+</div>
 
 {% endblock %}
 
