@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify, request
 from flask_bootstrap import Bootstrap, StaticCDN
 from queue import Empty, Queue
 import time
@@ -24,11 +24,14 @@ ctrl = Controller(SERIAL, BAUDRATE)
 
 # singleton that keeps track of shared state
 state = {
-    'queue': Queue(),
+    # GUI states
     'target': [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)],  # target states
     'timer': 0,           # time value to display
     'total_score': 0,     # total score to display
-    'timer_limit': 20,    # timer thread counts up to this limit and stops
+    # thread shared states
+    'queue': Queue(),
+    'timer_limit': -1,    # timer thread counts up to this limit and stops
+    'pause_timer': True,  # pause timer
     'end_timer': False,   # terminate timer_thread
 }
 
@@ -41,7 +44,7 @@ def timer_thread(state):
     timer = 0
     queue = state['queue']
     while not state['end_timer']:
-        while not state['end_timer'] and timer != state['timer_limit']:
+        while not state['end_timer'] and not state['pause_timer'] and timer != state['timer_limit']:
             time.sleep(1)
             timer += 1
             queue.put(f"TIMER {timer}")
@@ -68,20 +71,51 @@ def process_queue(state):
     if timer_cmd:
         state['timer'] = int(timer_cmd.group(1))
 
-    return state['timer']
+    # sample state changes
+    # state['target'][1]['color'] = 'green'
+    # state['total_score'] = 100
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/controller')
-def controller():
+@app.route('/sse')
+def sse():
     def eventStream():
         while True:
             # wait for source data to be available, then push it
-            cmd = process_queue(state)
-            yield f'data: {cmd}\n\n'
+            process_queue(state)
+            cmd = """
+data: { "timer": %d, "total_score": %d, "target": %s }
+
+
+""" % (state['timer'], state['total_score'], str(state['target']).replace("'", '"'))
+            yield cmd
     return Response(eventStream(), mimetype="text/event-stream")
+
+@app.route('/')
+def index():
+    # initialize GUI states
+    state['target']      = [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)]
+    state['pause_timer'] = True
+    time.sleep(1)
+    state['timer']       = 0
+    state['total_score'] = 0
+    return render_template('index.html')
+
+@app.route('/stop')
+def stop():
+    state['pause_timer'] = True
+    # time.sleep(1)
+    # state['timer'] = -1
+    # state['timer_limit'] = 0
+    # state['pause_timer'] = False
+    return jsonify(result="OK")
+
+@app.route('/start')
+def start():
+    state['pause_timer'] = False
+    time.sleep(2)
+    state['timer'] = 0
+    # state['timer_limit'] = 0
+    # state['pause_timer'] = False
+    return jsonify(result="OK")
 
 atexit.register(shutdown_controller)
 app.run()

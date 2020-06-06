@@ -11,20 +11,51 @@ Extensible Laser Firing System
 {% block scripts %}
 {{super()}}
 <script language="JavaScript">
+
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+// SSE
 function SSE() {
+    console.log("Inside SSE")
     var timerContainer = document.getElementById("timer");
-    var eventSource = new EventSource("/controller")
+    var eventSource = new EventSource($SCRIPT_ROOT + "/sse")
     eventSource.onmessage = function(e) {
-        timer.innerHTML = e.data;
+        var state = $.parseJSON(e.data);
+        // update the GUI based on server state
+        timer.innerHTML = state.timer;
+        score.innerHTML = state.total_score;
+        for (var i=0; i<4; i++) {
+            var target = state.target[i];
+            var targetId = "#target" + i;
+            $(targetId).innerHTML = target.score;
+            $(targetId).css({'background': target.color});
+        }
     };
 }
-$(window).on('load', SSE());  
+
+// stop training
+function stop() {
+    $.getJSON($SCRIPT_ROOT + '/stop', function(data) {
+        console.log("stop: " + data.result)
+    });
+}
+
+// start training
+function start() {
+    $.getJSON($SCRIPT_ROOT + '/start', function(data) {
+        console.log("start: " + data.result)
+    });
+}
 
 // adjust target height to match width
-$(window).on('load', function() {
+function adjustTargetHeight() {
     var cw = $('.elfs-target').width();
     $('.elfs-target').css({'height': cw+'px'});
-});
+}
+
+// autoload these functions
+$(document).ready(SSE());
+$(document).ready(adjustTargetHeight());
 
 </script>
 {% endblock %}
@@ -69,15 +100,15 @@ $(window).on('load', function() {
 <div class="row">
     <div class="col-sm-4"><div class="col-sm-12 align-middle text-center">
         <div class="btn-group">
-            <button type="button" class="btn btn-default elfs-button elfs-button-start">Start</button>
-            <button type="button" class="btn btn-default elfs-button elfs-button-stop">Stop</button>
+            <button type="button" class="btn btn-default elfs-button elfs-button-start" onClick="start()">Start</button>
+            <button type="button" class="btn btn-default elfs-button elfs-button-stop" onClick="stop()">Stop</button>
         </div>
     </div></div>
     <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-timer">
-        Timer<div id="timer">00:00</div>
+        Timer<div id="timer">n/a</div>
     </div></div>
     <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-score">
-        Score<div id="score">0</div>
+        Score<div id="score">n/a</div>
     </div></div>
 </div>
 
