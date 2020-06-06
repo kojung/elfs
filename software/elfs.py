@@ -24,15 +24,23 @@ ctrl = Controller(SERIAL, BAUDRATE)
 
 # singleton that keeps track of shared state
 state = {
-    # GUI states
-    'target': [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)],  # target states
-    'timer': 0,           # time value to display
-    'total_score': 0,     # total score to display
-    # thread shared states
+    # inter thread queue
     'queue': Queue(),
-    'timer_limit': -1,    # timer thread counts up to this limit and stops
-    'pause_timer': True,  # pause timer
-    'end_timer': False,   # terminate timer_thread
+
+    # gui states
+    'gui': {
+        'target': [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)],  # target states
+        'timer': 0,           # time value to display
+        'total_score': 0,     # total score to display
+    },
+
+    # timer states
+    'timer': {
+        'curr_value': 0,
+        'stop_value': -1,
+        'pause_timer': True,  # pause timer
+        'end_timer': False,   # terminate timer_thread
+    }
 }
 
 # start controller thread
@@ -41,35 +49,40 @@ reader_tid.start()
 
 # start timer thread
 def timer_thread(state):
-    timer = 0
     queue = state['queue']
-    while not state['end_timer']:
-        while not state['end_timer'] and not state['pause_timer'] and timer != state['timer_limit']:
+    timer = state['timer']
+    while not timer['end_timer']:
+        if timer['pause_timer'] or timer['end_timer'] or timer['curr_value'] == timer['stop_value']:
+            time.sleep(0)
+        else:
             time.sleep(1)
-            timer += 1
-            queue.put(f"TIMER {timer}")
+            timer['curr_value'] += 1
+            queue.put(f"TIMER {timer['curr_value']}")
 
 timer_tid = threading.Thread(target=timer_thread, args=[state])
 timer_tid.start()   
 
-def shutdown_controller():
-    # """shutdown the controller gracefully"""
+def shutdown():
+    """shutdown app gracefully"""
+    # first, terminate the controller thread
     ctrl.terminate = True
     reader_tid.join()
     for i in range(NUM_OF_TARGETS):
         ctrl.set_target(i, "DISABLED")
     print("INFO: Controller shutdown")
 
-    state['end_timer'] = True
+    # then, terminate the timer thread
+    state['timer']['end_timer'] = True
     timer_tid.join()
     print("INFO: Timer shutdown")
     
 def process_queue(state):
     """this could be any function that blocks until data is ready"""
     cmd = state['queue'].get()
+    gui = state['gui']
     timer_cmd = re.search(r'TIMER (\d+)', cmd)
     if timer_cmd:
-        state['timer'] = int(timer_cmd.group(1))
+        gui['timer'] = int(timer_cmd.group(1))
 
     # sample state changes
     # state['target'][1]['color'] = 'green'
@@ -81,42 +94,40 @@ def sse():
         while True:
             # wait for source data to be available, then push it
             process_queue(state)
+            gui = state['gui']
             cmd = """
 data: { "timer": %d, "total_score": %d, "target": %s }
 
 
-""" % (state['timer'], state['total_score'], str(state['target']).replace("'", '"'))
+""" % (gui['timer'], gui['total_score'], str(gui['target']).replace("'", '"'))
             yield cmd
     return Response(eventStream(), mimetype="text/event-stream")
 
 @app.route('/')
 def index():
     # initialize GUI states
-    state['target']      = [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)]
-    state['pause_timer'] = True
-    time.sleep(1)
-    state['timer']       = 0
-    state['total_score'] = 0
+    state['gui']['target']      = [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)]
+    state['gui']['timer']       = 0
+    state['gui']['total_score'] = 0
+    # initialize timer states
+    state['timer']['curr_value']  = 0
+    state['timer']['stop_value']  = 30
+    state['timer']['pause_timer'] = True
+    state['timer']['end_timer']   = False
     return render_template('index.html')
 
 @app.route('/stop')
 def stop():
-    state['pause_timer'] = True
-    # time.sleep(1)
-    # state['timer'] = -1
-    # state['timer_limit'] = 0
-    # state['pause_timer'] = False
+    state['timer']['pause_timer'] = True
     return jsonify(result="OK")
 
 @app.route('/start')
 def start():
-    state['pause_timer'] = False
-    time.sleep(2)
-    state['timer'] = 0
-    # state['timer_limit'] = 0
-    # state['pause_timer'] = False
+    state['timer']['pause_timer'] = False
+    time.sleep(1)
+    state['timer']['curr_value'] = 0
     return jsonify(result="OK")
 
-atexit.register(shutdown_controller)
+atexit.register(shutdown)
 app.run()
 
