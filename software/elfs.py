@@ -25,12 +25,11 @@ ctrl = Controller(SERIAL, BAUDRATE)
 # singleton that keeps track of shared state
 state = {
     'queue': Queue(),
-    'target': [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)],
-    'timer': 0,
-    'total_score': 0,
-    'mode': 'practice',
-    'started': False,
-    'timer_limit': 20,
+    'target': [{'score': 0, 'color':'lightgray'} for x in range(NUM_OF_TARGETS)],  # target states
+    'timer': 0,           # time value to display
+    'total_score': 0,     # total score to display
+    'timer_limit': 20,    # timer thread counts up to this limit and stops
+    'end_timer': False,   # terminate timer_thread
 }
 
 # start controller thread
@@ -41,8 +40,8 @@ reader_tid.start()
 def timer_thread(state):
     timer = 0
     queue = state['queue']
-    while True:
-        while timer != state['timer_limit']:
+    while not state['end_timer']:
+        while not state['end_timer'] and timer != state['timer_limit']:
             time.sleep(1)
             timer += 1
             queue.put(f"TIMER {timer}")
@@ -51,13 +50,16 @@ timer_tid = threading.Thread(target=timer_thread, args=[state])
 timer_tid.start()   
 
 def shutdown_controller():
-   # """shutdown the controller gracefully"""
-   print("INFO: Shutting down controller")
-   ctrl.terminate = True
-   reader_tid.join()
-   NUM_OF_TARGETS = 4
-   for i in range(NUM_OF_TARGETS):
-       ctrl.set_target(i, "DISABLED")
+    # """shutdown the controller gracefully"""
+    ctrl.terminate = True
+    reader_tid.join()
+    for i in range(NUM_OF_TARGETS):
+        ctrl.set_target(i, "DISABLED")
+    print("INFO: Controller shutdown")
+
+    state['end_timer'] = True
+    timer_tid.join()
+    print("INFO: Timer shutdown")
     
 def process_queue(state):
     """this could be any function that blocks until data is ready"""
