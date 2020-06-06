@@ -1,11 +1,16 @@
-.elftarget {
+.elfs-target {
     width: 100%;
     -webkit-border-radius: 100%;
     -moz-border-radius: 100%;
     border-radius: 100%;
     background: lightgray;
-    font-size: 600%;
-    line-height: 400%;
+    font-size: 500%;
+    line-height: 200%;
+}
+
+.elfs-mode {
+    width: 33%;
+    font-size: 300%;
 }
 
 body {

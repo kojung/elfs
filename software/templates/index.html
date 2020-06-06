@@ -22,8 +22,8 @@ $(window).on('load', SSE());
 
 // adjust target height to match width
 $(window).on('load', function() {
-    var cw = $('.elftarget').width();
-    $('.elftarget').css({'height': cw+'px'});
+    var cw = $('.elfs-target').width();
+    $('.elfs-target').css({'height': cw+'px'});
 });
 
 </script>
@@ -34,12 +34,37 @@ $(window).on('load', function() {
 <h1 class="text-center"><img src="static/logo.png" alt="logo" width="10%" height="auto"> Extensible Laser Firing System</h1>
 
 <div class="row">
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target0">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target1">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target2">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target3">0</div></div>
+    <div class="col-sm-3"><div class="col-sm-12 align-middle text-center elfs-target" id="target0">0</div></div>
+    <div class="col-sm-3"><div class="col-sm-12 align-middle text-center elfs-target" id="target1">0</div></div>
+    <div class="col-sm-3"><div class="col-sm-12 align-middle text-center elfs-target" id="target2">0</div></div>
+    <div class="col-sm-3"><div class="col-sm-12 align-middle text-center elfs-target" id="target3">0</div></div>
 </div>
 
+<ul class="nav nav-tabs">
+    <li role="presentation" class="active text-center elfs-mode" id="practice-mode">
+        <a href="#practice-content" data-toggle="tab">Practice</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="timed-mode">
+        <a href="#timed-content" data-toggle="tab">Timed</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="countdown-mode">
+        <a href="#countdown-content" data-toggle="tab">Countdown</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="practice-content" class="tab-pane fade in active">
+        Practice mode
+    </div>
+      
+    <div id="timed-content" class="tab-pane fade in">
+        Timed mode
+    </div>
+
+    <div id="countdown-content" class="tab-pane fade in">
+        Count down mode
+    </div>
+</div>
 <div id="target_div">Watch this space...</div>
 
 {% endblock %}
