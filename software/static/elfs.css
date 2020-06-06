@@ -34,6 +34,12 @@
     font-size: 400%;
 }
 
+.elfs-mode-desc {
+    margin: 5%;
+    text-align: center;
+    font-size: 200%;
+}
+
 body {
     padding-left: 20px;
     padding-right: 20px;

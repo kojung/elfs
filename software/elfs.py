@@ -26,6 +26,11 @@ queue  = queue.Queue()
 reader = threading.Thread(target=ctrl.reader, args=[queue])
 reader.start()
 
+queue.put("Hello")
+queue.put("World")
+for i in range(10):
+    queue.put(i)
+
 def shutdown_controller():
    # """shutdown the controller gracefully"""
    print("INFO: Shutting down controller")
@@ -35,11 +40,11 @@ def shutdown_controller():
    for i in range(NUM_OF_TARGETS):
        ctrl.set_target(i, "DISABLED")
     
-def get_message(count):
+def process_queue(queue):
     """this could be any function that blocks until data is ready"""
-    # return queue.get()
+    cmd = queue.get()
     time.sleep(1.0)
-    return count + 1
+    return cmd
 
 @app.route('/')
 def index():
@@ -48,11 +53,10 @@ def index():
 @app.route('/controller')
 def controller():
     def eventStream():
-        count=0
         while True:
             # wait for source data to be available, then push it
-            count = get_message(count)
-            yield 'data: {}\n\n'.format(count)
+            cmd = process_queue(queue)
+            yield f'data: {cmd}\n\n'
     return Response(eventStream(), mimetype="text/event-stream")
 
 atexit.register(shutdown_controller)
