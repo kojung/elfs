@@ -19,6 +19,8 @@ function SSE() {
     };
 }
 $(window).on('load', SSE());  
+
+// adjust target height to match width
 $(window).on('load', function() {
     var cw = $('.elftarget').width();
     $('.elftarget').css({'height': cw+'px'});
@@ -29,13 +31,13 @@ $(window).on('load', function() {
 
 {% block content %}
 
-<h1><img src="static/logo.png" alt="logo" width="10%" height="auto">Extensible Laser Firing System</h1>
+<h1 class="text-center"><img src="static/logo.png" alt="logo" width="10%" height="auto"> Extensible Laser Firing System</h1>
 
 <div class="row">
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget">0</div></div>
-    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget">0</div></div>
+    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target0">0</div></div>
+    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target1">0</div></div>
+    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target2">0</div></div>
+    <div class="col-md-3"><div class="col-md-12 align-middle text-center elftarget" id="target3">0</div></div>
 </div>
 
 <div id="target_div">Watch this space...</div>
