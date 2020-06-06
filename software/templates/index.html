@@ -1,23 +1,43 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}
+Extensible Laser Firing System
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='elfs.css')}}">
+{% endblock %}
 
 {% block scripts %}
-    {{super()}}
-    <script language="JavaScript">
-    function SSE() {
-        var targetContainer = document.getElementById("target_div");
-        var eventSource = new EventSource("/controller")
-        eventSource.onmessage = function(e) {
-            targetContainer.innerHTML = e.data;
-        };
-    }
-    $(window).on('load', SSE());  
-    </script>
+{{super()}}
+<script language="JavaScript">
+function SSE() {
+    var targetContainer = document.getElementById("target_div");
+    var eventSource = new EventSource("/controller")
+    eventSource.onmessage = function(e) {
+        targetContainer.innerHTML = e.data;
+    };
+}
+$(window).on('load', SSE());  
+$(window).on('load', function() {
+    var cw = $('.elftarget').width();
+    $('.elftarget').css({'height': cw+'px'});
+});
+
+</script>
 {% endblock %}
 
 {% block content %}
-<img src="static/logo.png">
-<h1>Hello, Bootstrap 2</h1>
+
+<h1><img src="static/logo.png" alt="logo" width="10%" height="auto">Extensible Laser Firing System</h1>
+
+<div class="row">
+    <div class="col-md-3"><div class="col-md-12 elftarget">circle</div></div>
+    <div class="col-md-3"><div class="col-md-12 elftarget">circle</div></div>
+    <div class="col-md-3"><div class="col-md-12 elftarget">circle</div></div>
+    <div class="col-md-3"><div class="col-md-12 elftarget">circle</div></div>
+</div>
+
 <div id="target_div">Watch this space...</div>
 
 {% endblock %}
