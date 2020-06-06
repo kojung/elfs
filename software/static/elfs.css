@@ -3,5 +3,12 @@
     -webkit-border-radius: 100%;
     -moz-border-radius: 100%;
     border-radius: 100%;
-    background: red;
+    background: lightgray;
+    font-size: 600%;
+    line-height: 400%;
+}
+
+body {
+    padding-left: 20px;
+    padding-right: 20px;
 }
