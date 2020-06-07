@@ -121,12 +121,21 @@ def stop():
     state['timer']['pause_timer'] = True
     return jsonify(result="OK")
 
-@app.route('/start')
+@app.route('/start', methods=['GET'])
 def start():
+    mode = request.args.get('mode')
+    if mode == 'practice':
+        pass
+
+    elif mode == 'timed':
+        pass
+
+    elif mode == 'countdown':
+        pass
     state['timer']['pause_timer'] = False
     time.sleep(1)
     state['timer']['curr_value'] = 0
-    return jsonify(result="OK")
+    return jsonify(result=f"OK. mode={mode}")
 
 atexit.register(shutdown)
 app.run()

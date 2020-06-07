@@ -42,7 +42,8 @@ function stop() {
 
 // start training
 function start() {
-    $.getJSON($SCRIPT_ROOT + '/start', function(data) {
+    var params = {"mode": "practice"}
+    $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
 }
