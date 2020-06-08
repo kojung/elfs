@@ -16,7 +16,7 @@ $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
 // SSE
 function SSE() {
-    console.log("Inside SSE")
+    console.log("Starting SSE")
     var timerContainer = document.getElementById("timer");
     var eventSource = new EventSource($SCRIPT_ROOT + "/sse")
     eventSource.onmessage = function(e) {
