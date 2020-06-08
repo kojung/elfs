@@ -6,7 +6,6 @@ from queue import Empty, Queue
 import time
 import threading
 import atexit
-import re
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
@@ -22,12 +21,14 @@ app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 SERIAL         = '/dev/ttyUSB0'
 BAUDRATE       = 9600
 NUM_OF_TARGETS = 4
-ctrl = Controller(SERIAL, BAUDRATE)
 
 # singleton that keeps track of shared state
 state = {
     # inter thread queue
     'queue': Queue(),
+
+    # controller
+    'controller': Controller(SERIAL, BAUDRATE),
 
     # current training mode
     'mode': 'practice',
@@ -55,7 +56,7 @@ training = {
 }
 
 # start controller thread
-reader_tid = threading.Thread(target=ctrl.reader, args=[state['queue']])
+reader_tid = threading.Thread(target=state['controller'].reader, args=[state['queue']])
 reader_tid.start()
 
 def timer_thread(state):
@@ -76,6 +77,7 @@ timer_tid.start()
 def shutdown():
     """shutdown app gracefully"""
     # terminate the controller thread
+    ctrl = state['controller']
     ctrl.terminate = True
     reader_tid.join()
     for i in range(NUM_OF_TARGETS):
@@ -90,9 +92,12 @@ def shutdown():
 def process_queue(state):
     """pop data from queue and perform necessary state updates"""
     cmd = state['queue'].get()
-    # process training related actions
-    # @TODO
-    pass
+    if cmd == 'TIMER':
+        # just a time event, no need to do anything
+        pass
+    else:
+        # controller events, delegate to the training object
+        training[state['mode']].process(cmd)
 
 @app.route('/sse')
 def sse():
@@ -121,9 +126,9 @@ def index():
     # initialize timer states
     timer                = state['timer']
     timer['pause_timer'] = True
+    time.sleep(1)
     timer['curr_value']  = -2
     timer['stop_value']  = 0
-    time.sleep(1)
     timer['pause_timer'] = False
     timer['end_timer']   = False
 
@@ -140,6 +145,26 @@ def start():
     training[state['mode']].start()
     return jsonify(result=f"mode={state['mode']}, pause_timer={state['timer']['pause_timer']}")
 
+## test thread
+def test_thread(queue):
+    time.sleep(5)
+    print("Started test thread!!!")
+    cmds = """
+RSP_HIT_STATUS 0 1
+RSP_HIT_STATUS 1 1
+RSP_HIT_STATUS 2 1
+RSP_HIT_STATUS 3 1
+RSP_HIT_STATUS 0 1
+RSP_HIT_STATUS 1 1
+RSP_HIT_STATUS 2 1
+RSP_HIT_STATUS 3 1
+""".strip().split("\n")
+    for cmd in cmds:
+        queue.put(cmd)
+        time.sleep(1)
+
+test_tid = threading.Thread(target=test_thread, args=[state['queue']])
+test_tid.start()
+
 atexit.register(shutdown)
 app.run()
-
