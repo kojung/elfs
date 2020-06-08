@@ -17,17 +17,16 @@ $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 // SSE
 function SSE() {
     console.log("Starting SSE")
-    var timerContainer = document.getElementById("timer");
     var eventSource = new EventSource($SCRIPT_ROOT + "/sse")
     eventSource.onmessage = function(e) {
         var state = $.parseJSON(e.data);
         // update the GUI based on server state
-        timer.innerHTML = state.timer;
-        score.innerHTML = state.total_score;
+        $("#timer").html(state.timer);
+        $("#score").html(state.total_score);
         for (var i=0; i<4; i++) {
             var target = state.target[i];
             var targetId = "#target" + i;
-            $(targetId).innerHTML = target.score;
+            $(targetId).html(target.score);
             $(targetId).css({'background': target.color});
         }
     };

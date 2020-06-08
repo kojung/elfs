@@ -150,18 +150,15 @@ def test_thread(queue):
     time.sleep(5)
     print("Started test thread!!!")
     cmds = """
-RSP_HIT_STATUS 0 1
-RSP_HIT_STATUS 1 1
-RSP_HIT_STATUS 2 1
-RSP_HIT_STATUS 3 1
-RSP_HIT_STATUS 0 1
-RSP_HIT_STATUS 1 1
-RSP_HIT_STATUS 2 1
-RSP_HIT_STATUS 3 1
+        RSP_HIT_STATUS 0 1
+        RSP_HIT_STATUS 1 1
+        RSP_HIT_STATUS 2 1
+        RSP_HIT_STATUS 3 1
 """.strip().split("\n")
-    for cmd in cmds:
-        queue.put(cmd)
-        time.sleep(1)
+    while True:
+        for cmd in cmds:
+            queue.put(cmd.strip())
+            time.sleep(2)
 
 test_tid = threading.Thread(target=test_thread, args=[state['queue']])
 test_tid.start()
