@@ -94,10 +94,11 @@ def index():
 
     return render_template('index.html')
 
-@app.route('/stop')
+@app.route('/stop', methods=['GET'])
 def stop():
+    elased_time = request.args.get('elapsedTime')
     training[state['mode']].stop()
-    return jsonify(result=f"mode={state['mode']}")
+    return jsonify(result=f"mode={state['mode']}, elased_time={elased_time}")
 
 @app.route('/start', methods=['GET'])
 def start():

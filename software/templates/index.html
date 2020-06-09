@@ -14,6 +14,10 @@ Extensible Laser Firing System
 
 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
+var currentTime = 0;
+var elapsedTime = 0;
+var timer = 0;
+
 // SSE
 function SSE() {
     console.log("Starting SSE")
@@ -33,7 +37,8 @@ function SSE() {
 
 // stop training
 function stop() {
-    $.getJSON($SCRIPT_ROOT + '/stop', function(data) {
+    var params = {"elapsedTime": elapsedTime}
+    $.getJSON($SCRIPT_ROOT + '/stop', params, function(data) {
         console.log("stop: " + data.result)
     });
     stopTimer();
@@ -45,7 +50,7 @@ function start() {
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
-    startTimer();
+    currentTimer();
 }
 
 // adjust target height to match width
@@ -59,18 +64,16 @@ function fillZero(num) {
 };
 
 // 10ms timer
-var startTime = 0;
 function updateTimer() {
-    var elapsedTime = Math.floor((+new Date() - startTime) / 10);
+    elapsedTime = Math.floor((+new Date() - currentTime) / 10);
     var mi = Math.floor(elapsedTime / (60 * 100));
     var ss = Math.floor((elapsedTime - mi * 60 * 100) / 100);
     var ms = elapsedTime - Math.floor(elapsedTime / 100) * 100;
     $('#timer').html(fillZero(mi) + ":" + fillZero(ss) + "." + fillZero(ms));
 }
 
-var timer = 0;
-function startTimer() {
-    startTime = +new Date();
+function currentTimer() {
+    currentTime = +new Date();
     timer = setInterval(updateTimer, 10);
 }
 
