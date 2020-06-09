@@ -14,26 +14,11 @@ class TrainingMode():
 
     def stop(self):
         """stop the training"""
-        self._stop_timer()
         self.status = 'stopped'
 
     def process(self, cmd):
         """process an action from the action queue"""
         raise NotImplementedError
-
-    def _update_timer(self, stop_value, curr_value):
-        """Pause timer and update the stop and current value. Resume afterwards"""
-        timer = self.state['timer']
-        timer['pause_timer'] = True
-        time.sleep(1)
-        timer['stop_value']  = stop_value
-        timer['curr_value']  = curr_value
-        timer['pause_timer'] = False
-        
-    def _stop_timer(self):
-        """Pause timer without resetting value"""
-        timer = self.state['timer']
-        timer['pause_timer'] = True
 
     def _reset_all_targets(self):
         """reset all targets to 0"""
@@ -67,14 +52,12 @@ class PracticeMode(TrainingMode):
         # practice has no time limit
         self._reset_all_targets()
         self._enable_all_targets()
-        self._update_timer(stop_value=-1, curr_value=0)
 
     def process(self, cmd):
         """process actions"""
-        timer = self.state['timer']
         gui = self.state['gui']
 
-        # only process when timer is running
+        # only process when in running state
         if self.status == "running":
             hit_status_match = re.search(r'RSP_HIT_STATUS\s+(\d+)\s+(\d+)', cmd)
             # update the target status
@@ -99,9 +82,7 @@ class TimedMode(TrainingMode):
     def start(self, time_limit):
         """start the training"""
         super().start()
-        # set timer to time_limit
         self._enable_all_targets()
-        self._update_timer(stop_value=time_limit, curr_value=0)
 
     def process(self, cmd):
         """process actions"""
@@ -117,9 +98,7 @@ class CountdownMode(TrainingMode):
     def start(self):
         """start the training"""
         super().start()
-        # count down does not need timer
         self._reset_all_targets()
-        self._update_timer(stop_value=0, curr_value=-3)
 
     def process(self, cmd):
         """process actions"""

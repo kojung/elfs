@@ -21,7 +21,6 @@ function SSE() {
     eventSource.onmessage = function(e) {
         var state = $.parseJSON(e.data);
         // update the GUI based on server state
-        $("#timer").html(state.timer);
         $("#score").html(state.total_score);
         for (var i=0; i<4; i++) {
             var target = state.target[i];
@@ -37,6 +36,7 @@ function stop() {
     $.getJSON($SCRIPT_ROOT + '/stop', function(data) {
         console.log("stop: " + data.result)
     });
+    stopTimer();
 }
 
 // start training
@@ -45,12 +45,37 @@ function start() {
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
+    startTimer();
 }
 
 // adjust target height to match width
 function adjustTargetHeight() {
     var cw = $('.elfs-target').width();
     $('.elfs-target').css({'height': cw+'px'});
+}
+
+function fillZero(num) {
+    return num < 10 ? '0' + num : num;
+};
+
+// 10ms timer
+var startTime = 0;
+function updateTimer() {
+    var elapsedTime = Math.floor((+new Date() - startTime) / 10);
+    var mi = Math.floor(elapsedTime / (60 * 100));
+    var ss = Math.floor((elapsedTime - mi * 60 * 100) / 100);
+    var ms = elapsedTime - Math.floor(elapsedTime / 100) * 100;
+    $('#timer').html(fillZero(mi) + ":" + fillZero(ss) + "." + fillZero(ms));
+}
+
+var timer = 0;
+function startTimer() {
+    startTime = +new Date();
+    timer = setInterval(updateTimer, 10);
+}
+
+function stopTimer() {
+    clearInterval(timer);
 }
 
 // autoload these functions
