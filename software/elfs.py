@@ -112,8 +112,8 @@ def start():
     # get mode dependent arguments
     if mode == "countdown":
         # get countdown speed
-        # @TODO
-        training[state['mode']].start(refresh_mode)
+        speed = int(request.args.get('countdownSpeed'))
+        training[state['mode']].start(refresh_mode, speed)
     else:
         training[state['mode']].start(refresh_mode)
 
@@ -129,11 +129,15 @@ def test_thread(state):
         enabled_targets_with_index = [(idx,target) for idx,target in enumerate(targets) if target['color'] == 'green']
         if len(enabled_targets_with_index) > 0:
             random_idx, random_target = random.choice(enabled_targets_with_index)
-            queue.put(f"RSP_HIT_STATUS {random_idx} 1")
+            coin = random.randint(0, 2)
+            if coin != 0:
+                queue.put(f"RSP_HIT_STATUS {random_idx} 1")
+            else: # 33% chance of timeout
+                queue.put(f"RSP_COUNTDOWN_EXPIRED {random_idx} 1")
             time.sleep(2)
 
 test_tid = threading.Thread(target=test_thread, args=[state])
-test_tid.start()
+# test_tid.start()
 
 atexit.register(shutdown)
 app.run()

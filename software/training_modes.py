@@ -52,7 +52,6 @@ class PracticeMode(TrainingMode):
         super().start()
         assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
         self.refresh_mode = refresh_mode
-        # practice has no time limit
         self._reset_all_targets()
         self._enable_all_targets()
 
@@ -96,13 +95,54 @@ class CountdownMode(TrainingMode):
         """Constructor"""
         super().__init__(state)
 
-    def start(self, refresh_mode):
+    def start(self, refresh_mode, countdown_speed):
         """start the training"""
         super().start()
-        self.refresh_mode = refresh_mode
+        self.refresh_mode    = refresh_mode
+        self.countdown_speed = countdown_speed
         assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
         self._reset_all_targets()
+        gui = self.state['gui']
+        ctrl = self.state['controller']
+        ctrl.set("TIMER_INTERVAL", countdown_speed)
+        num_targets = len(gui['target'])
+        for i in range(num_targets):
+            ctrl.set_target(i, 'TIMED')
+            gui['target'][i]['color'] = 'green'
 
     def process(self, cmd):
         """process actions"""
-        pass
+        gui  = self.state['gui']
+        ctrl = self.state['controller']
+
+        # only process when in running state
+        if self.status == "running":
+            hit_status_match = re.search(r'RSP_HIT_STATUS\s+(\d+)\s+(\d+)', cmd)
+            countdown_expired_match = re.search(r'RSP_COUNTDOWN_EXPIRED\s+(\d+)\s+(\d+)', cmd)
+
+            # update the target status
+            if hit_status_match:
+                tid = int(hit_status_match.group(1))
+                val = int(hit_status_match.group(2))
+                if val == 1:
+                    gui['target'][tid]['score'] += 1
+                    gui['total_score']          += 1
+                    gui['target'][tid]['color'] = 'red'
+            elif countdown_expired_match:
+                tid = int(countdown_expired_match.group(1))
+                val = int(countdown_expired_match.group(2))
+                if val == 1:
+                    gui['target'][tid]['color'] = 'lightgrey'
+
+            # if all targets have been shot, restore red targets
+            if len(list(filter(lambda target: target['color'] == 'green', gui['target']))) == 0:
+                red_targets = [(idx, target) for idx, target in enumerate(gui['target']) if target['color'] == 'red']
+                if len(red_targets) > 0:
+                    if self.refresh_mode == "all":
+                        for idx, target in red_targets:
+                            ctrl.set_target(idx, 'TIMED')
+                            gui['target'][idx]['color'] = 'green'
+                    elif self.refresh_mode == "random":
+                        idx, target = random.choice(red_targets)
+                        ctrl.set_target(idx, 'TIMED')
+                        gui['target'][idx]['color'] = 'green'

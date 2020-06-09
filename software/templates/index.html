@@ -61,7 +61,8 @@ function start() {
         stopTime = duration * 100;
     } else if ( chosenMode == "countdown" ) {
         var refreshMode = $("#countdownRefreshMode option:selected").attr("value")
-        var params = {"mode": chosenMode, "refreshMode": refreshMode}
+        var speed = $("#countdownSpeed option:selected").attr("value")
+        var params = {"mode": chosenMode, "refreshMode": refreshMode, "countdownSpeed": speed}
         stopTime = -1;
     }
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
@@ -167,6 +168,15 @@ $(document).ready(adjustTargetHeight());
         <select id="countdownRefreshMode">
             <option value="all">All targets</option>
             <option value="random">Random target</option>
+        </select>
+        <label for="speed">Countdown speed:</label>
+        <select id="countdownSpeed">
+            <option value="500">0.5 sec</option>
+            <option value="1000">1 sec</option>
+            <option value="2000">2 sec</option>
+            <option value="3000">3 sec</option>
+            <option value="4000">4 sec</option>
+            <option value="5000">5 sec</option>
         </select>
     </div>
 </div>
