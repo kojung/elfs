@@ -1,5 +1,6 @@
 import time
 import re
+import random
 
 class TrainingMode():
     """Base class for all training modes"""
@@ -46,9 +47,11 @@ class PracticeMode(TrainingMode):
         """Constructor"""
         super().__init__(state)
 
-    def start(self):
+    def start(self, refresh_mode):
         """start the training"""
         super().start()
+        assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
+        self.refresh_mode = refresh_mode
         # practice has no time limit
         self._reset_all_targets()
         self._enable_all_targets()
@@ -69,9 +72,17 @@ class PracticeMode(TrainingMode):
                     gui['total_score']          += 1
                     gui['target'][tid]['color'] = 'red'
 
-            # if all targets have been shot, restore all targets
+            # if all targets have been shot, restore targets
             if all(map(lambda target: target['color'] == 'red', gui['target'])):
-                self._enable_all_targets()
+                if self.refresh_mode == "all":
+                    self._enable_all_targets()
+                elif self.refresh_mode == "random":
+                    ctrl          = self.state['controller']
+                    gui           = self.state['gui']
+                    num_targets   = len(gui['target'])
+                    random_target = random.randint(0, num_targets)
+                    ctrl.set_target(random_target, 'ENABLED')
+                    gui['target'][random_target]['color'] = 'green'
 
 class TimedMode(TrainingMode):
     """Timed training mode"""
@@ -79,9 +90,11 @@ class TimedMode(TrainingMode):
         """Constructor"""
         super().__init__(state)
 
-    def start(self, time_limit):
+    def start(self, refresh_mode):
         """start the training"""
         super().start()
+        assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
+        self.refresh_mode = refresh_mode
         self._enable_all_targets()
 
     def process(self, cmd):
@@ -95,9 +108,11 @@ class CountdownMode(TrainingMode):
         """Constructor"""
         super().__init__(state)
 
-    def start(self):
+    def start(self, refresh_mode):
         """start the training"""
         super().start()
+        self.refresh_mode = refresh_mode
+        assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
         self._reset_all_targets()
 
     def process(self, cmd):

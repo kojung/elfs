@@ -6,6 +6,7 @@ from queue import Empty, Queue
 import time
 import threading
 import atexit
+import random
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
@@ -102,25 +103,32 @@ def stop():
 
 @app.route('/start', methods=['GET'])
 def start():
+    mode = request.args.get('mode')
+    refresh_mode = request.args.get('refreshMode')
+
+    # get mode dependent arguments
+    if mode == "countdown":
+        # get countdown speed
+        # @TODO
+        pass
     state['mode'] = request.args.get('mode')
-    training[state['mode']].start()
+    training[state['mode']].start(refresh_mode)
     return jsonify(result=f"mode={state['mode']}")
 
-def test_thread(queue):
+def test_thread(state):
+    queue = state['queue']
     time.sleep(5)
     print("Started test thread!!!")
-    cmds = """
-        RSP_HIT_STATUS 0 1
-        RSP_HIT_STATUS 1 1
-        RSP_HIT_STATUS 2 1
-        RSP_HIT_STATUS 3 1
-""".strip().split("\n")
     while True:
-        for cmd in cmds:
-            queue.put(cmd.strip())
+        # shoot a random target that is enabled in the GUI
+        targets = state['gui']['target']
+        enabled_targets_with_index = [(idx,target) for idx,target in enumerate(targets) if target['color'] == 'green']
+        if len(enabled_targets_with_index) > 0:
+            random_idx, random_target = random.choice(enabled_targets_with_index)
+            queue.put(f"RSP_HIT_STATUS {random_idx} 1")
             time.sleep(2)
 
-test_tid = threading.Thread(target=test_thread, args=[state['queue']])
+test_tid = threading.Thread(target=test_thread, args=[state])
 test_tid.start()
 
 atexit.register(shutdown)

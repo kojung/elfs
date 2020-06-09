@@ -46,7 +46,19 @@ function stop() {
 
 // start training
 function start() {
-    var params = {"mode": "practice"}
+    var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
+
+    // build parameters for chosen mode
+    if ( chosenMode == "practice" ) {
+        var refreshMode = $("#practiceRefreshMode option:selected").attr("value")
+        var params = {"mode": chosenMode, "refreshMode": refreshMode}
+    } else if ( chosenMode == "timed" ) {
+        var refreshMode = $("#timedRefreshMode option:selected").attr("value")
+        var params = {"mode": chosenMode, "refreshMode": refreshMode}
+    } else if ( chosenMode == "countdown" ) {
+        var refreshMode = $("#countdownRefreshMode option:selected").attr("value")
+        var params = {"mode": chosenMode, "refreshMode": refreshMode}
+    }
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
@@ -99,29 +111,44 @@ $(document).ready(adjustTargetHeight());
     <div class="col-sm-3"><div class="col-sm-12 align-middle text-center elfs-target" id="target3">0</div></div>
 </div>
 
-<ul class="nav nav-tabs">
-    <li role="presentation" class="active text-center elfs-mode" id="practice-mode">
+<ul class="nav nav-tabs" id="elfs-nav-tabs">
+    <li role="presentation" class="active text-center elfs-mode" id="practice">
         <a href="#practice-content" data-toggle="tab">Practice</a>
     </li>
-    <li role="presentation" class="text-center elfs-mode" id="timed-mode">
+    <li role="presentation" class="text-center elfs-mode" id="timed">
         <a href="#timed-content" data-toggle="tab">Timed</a>
     </li>
-    <li role="presentation" class="text-center elfs-mode" id="countdown-mode">
+    <li role="presentation" class="text-center elfs-mode" id="countdown">
         <a href="#countdown-content" data-toggle="tab">Countdown</a>
     </li>
 </ul>
 
 <div class="tab-content">
     <div id="practice-content" class="tab-pane fade in active elfs-mode-desc">
-        Click start to practice. Click Stop to end practice.
+        <div>Click start to practice. Click Stop to end practice.</div>
+        <label for="refreshMode">Refresh target mode:</label>
+        <select id="practiceRefreshMode">
+            <option value="all">All targets</option>
+            <option value="random">Random target</option>
+        </select>
     </div>
       
     <div id="timed-content" class="tab-pane fade in elfs-mode-desc">
-        Set the a timer count down and hit as many targets as possible.
+        <div>Set the a timer count down and hit as many targets as possible.</div>
+        <label for="refreshMode">Refresh target mode:</label>
+        <select id="timedRefreshMode">
+            <option value="all">All targets</option>
+            <option value="random">Random target</option>
+        </select>
     </div>
 
     <div id="countdown-content" class="tab-pane fade in elfs-mode-desc">
-        Each target has a count down timer.
+        <div>Each target has a count down timer.</div>
+        <label for="refreshMode">Refresh target mode:</label>
+        <select id="countdownRefreshMode">
+            <option value="all">All targets</option>
+            <option value="random">Random target</option>
+        </select>
     </div>
 </div>
 
