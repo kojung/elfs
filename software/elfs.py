@@ -140,4 +140,4 @@ test_tid = threading.Thread(target=test_thread, args=[state])
 # test_tid.start()
 
 atexit.register(shutdown)
-app.run()
+app.run(host='0.0.0.0')
