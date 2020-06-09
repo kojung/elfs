@@ -84,22 +84,10 @@ class PracticeMode(TrainingMode):
                     ctrl.set_target(random_target, 'ENABLED')
                     gui['target'][random_target]['color'] = 'green'
 
-class TimedMode(TrainingMode):
-    """Timed training mode"""
-    def __init__(self, state):
-        """Constructor"""
-        super().__init__(state)
-
-    def start(self, refresh_mode):
-        """start the training"""
-        super().start()
-        assert refresh_mode in ["all", "random"], f"Unsupported refresh_mode '{refresh_mode}'"
-        self.refresh_mode = refresh_mode
-        self._enable_all_targets()
-
-    def process(self, cmd):
-        """process actions"""
-        pass
+class TimedMode(PracticeMode):
+    # Timed mode is the same as practice mode
+    # All differences are in the client side
+    pass
 
 
 class CountdownMode(TrainingMode):

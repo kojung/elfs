@@ -104,15 +104,19 @@ def stop():
 @app.route('/start', methods=['GET'])
 def start():
     mode = request.args.get('mode')
+    state['mode'] = request.args.get('mode')
+
+    # refresh mode
     refresh_mode = request.args.get('refreshMode')
 
     # get mode dependent arguments
     if mode == "countdown":
         # get countdown speed
         # @TODO
-        pass
-    state['mode'] = request.args.get('mode')
-    training[state['mode']].start(refresh_mode)
+        training[state['mode']].start(refresh_mode)
+    else:
+        training[state['mode']].start(refresh_mode)
+
     return jsonify(result=f"mode={state['mode']}")
 
 def test_thread(state):

@@ -16,7 +16,8 @@ $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
 var currentTime = 0;
 var elapsedTime = 0;
-var timer = 0;
+var stopTime    = -1;
+var timer       = 0;
 
 // SSE
 function SSE() {
@@ -52,17 +53,21 @@ function start() {
     if ( chosenMode == "practice" ) {
         var refreshMode = $("#practiceRefreshMode option:selected").attr("value")
         var params = {"mode": chosenMode, "refreshMode": refreshMode}
+        stopTime = -1;
     } else if ( chosenMode == "timed" ) {
         var refreshMode = $("#timedRefreshMode option:selected").attr("value")
+        var duration = $("#timedDuration option:selected").attr("value")
         var params = {"mode": chosenMode, "refreshMode": refreshMode}
+        stopTime = duration * 100;
     } else if ( chosenMode == "countdown" ) {
         var refreshMode = $("#countdownRefreshMode option:selected").attr("value")
         var params = {"mode": chosenMode, "refreshMode": refreshMode}
+        stopTime = -1;
     }
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
-    currentTimer();
+    startTimer();
 }
 
 // adjust target height to match width
@@ -82,9 +87,15 @@ function updateTimer() {
     var ss = Math.floor((elapsedTime - mi * 60 * 100) / 100);
     var ms = elapsedTime - Math.floor(elapsedTime / 100) * 100;
     $('#timer').html(fillZero(mi) + ":" + fillZero(ss) + "." + fillZero(ms));
+
+    // check if we should stop the timer
+    if (stopTime > 0 && elapsedTime >= stopTime) {
+        clearInterval(timer);
+        stop();
+    }
 }
 
-function currentTimer() {
+function startTimer() {
     currentTime = +new Date();
     timer = setInterval(updateTimer, 10);
 }
@@ -139,6 +150,14 @@ $(document).ready(adjustTargetHeight());
         <select id="timedRefreshMode">
             <option value="all">All targets</option>
             <option value="random">Random target</option>
+        </select>
+        <label for="duration">Duration:</label>
+        <select id="timedDuration">
+            <option value="60">1 min</option>
+            <option value="120">2 mins</option>
+            <option value="180">3 mins</option>
+            <option value="240">4 mins</option>
+            <option value="300">5 mins</option>
         </select>
     </div>
 
