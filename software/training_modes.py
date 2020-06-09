@@ -80,7 +80,7 @@ class PracticeMode(TrainingMode):
                     ctrl          = self.state['controller']
                     gui           = self.state['gui']
                     num_targets   = len(gui['target'])
-                    random_target = random.randint(0, num_targets)
+                    random_target = random.randint(0, num_targets - 1)
                     ctrl.set_target(random_target, 'ENABLED')
                     gui['target'][random_target]['color'] = 'green'
 
