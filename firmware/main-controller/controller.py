@@ -64,10 +64,11 @@ class Controller():
             while len(self.buffer) == 0:
                 try:
                     self.buffer = [x for x in self.ser.read(100)]
-                except serial.SerialException:
+                except serial.serialutil.SerialException as e:
                     # ignore this error
                     #    raise SerialException('read failed: {}'.format(e))
                     # serial.serialutil.SerialException: read failed: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+                    print(f"exception: {e}")
                     pass
         c = self.buffer.pop(0)
         return c
