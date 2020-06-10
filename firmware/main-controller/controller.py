@@ -16,8 +16,8 @@ class Controller():
         self.cmd = cmd.Cmd()
         self.rsp = rsp.Rsp()
         self.terminate = False
-        self.ser = ser = serial.Serial(port=port, baudrate=baurate, parity=serial.PARITY_NONE,
-                                       stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=None)
+        self.ser = serial.Serial(port=port, baudrate=baurate, parity=serial.PARITY_NONE,
+                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0.01)
 
     def set_target(self, tid, mode):
         """Set target mode"""
@@ -57,45 +57,55 @@ class Controller():
         payload = bytearray([opcode_value, msb, lsb])
         self.ser.write(payload)
 
+    def byte_from_serial(self):
+        """Read 1 byte from serial port"""
+        read_buffer = b''
+        while True:
+            byte_chunk = self.ser.read(1)
+            read_buffer += byte_chunk
+            if len(byte_chunk) == 1:
+                break
+        return int.from_bytes(read_buffer, byteorder='big')
+
     def reader(self, queue):
         """method for reader thread"""
         while not self.terminate:
             if self.ser.in_waiting:
-                data = int.from_bytes(self.ser.read(), byteorder='big')
+                data = self.byte_from_serial()
                 if data == self.rsp["RSP_HIT_STATUS"]:
-                    tid = int.from_bytes(self.ser.read(), byteorder='big')
-                    val = int.from_bytes(self.ser.read(), byteorder='big')
+                    tid = self.byte_from_serial()
+                    val = self.byte_from_serial()
                     queue.put(f"RSP_HIT_STATUS {tid} {val}")
                 elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
-                    tid = int.from_bytes(self.ser.read(), byteorder='big')
-                    val = int.from_bytes(self.ser.read(), byteorder='big')
+                    tid = self.byte_from_serial()
+                    val = self.byte_from_serial()
                     queue.put(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
                 elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
-                    msb = int.from_bytes(self.ser.read(), byteorder='big')
-                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    msb = self.byte_from_serial()
+                    lsb = self.byte_from_serial()
                     val = msb << 8 | lsb
                     queue.put(f"RSP_SENSOR_THRESHOLD {val}")
                 elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
-                    msb = int.from_bytes(self.ser.read(), byteorder='big')
-                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    msb = self.byte_from_serial()
+                    lsb = self.byte_from_serial()
                     val = msb << 8 | lsb
                     queue.put(f"RSP_RING_BRIGHTNESS {val}")
                 elif data == self.rsp["RSP_TIMER_INTERVAL"]:
-                    msb = int.from_bytes(self.ser.read(), byteorder='big')
-                    lsb = int.from_bytes(self.ser.read(), byteorder='big')
+                    msb = self.byte_from_serial()
+                    lsb = self.byte_from_serial()
                     val = msb << 8 | lsb
                     queue.put(f"RSP_TIMER_INTERVAL {val}")
                 elif data == self.rsp["RSP_DEBUG_START"]:
                     msg = ""
                     while True:
-                        data = int.from_bytes(self.ser.read(), byteorder='big')
+                        data = self.byte_from_serial()
                         if data == self.rsp["RSP_DEBUG_END"]:
                             queue.put(f"DEBUG: {msg}")
                             break
                         else:
                             msg += chr(data)
                 else:
-                    # ignore
+                    queue.put(f"DEBUG: Unknown byte '{data}'")
                     pass
             else:
                 time.sleep(0)  # yield

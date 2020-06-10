@@ -33,6 +33,24 @@ function SSE() {
             $(targetId).html(target.score);
             $(targetId).css({'background': target.color});
         }
+
+        // if all targets are disabled in countdown mode, stop the timer
+        var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
+        if (chosenMode == "countdown") {
+            var allTargetsDisabled = 1;
+            for (var i=0; i<4; i++) {
+                var targetId = "#target" + i;
+                if ( $(targetId).css('background') != "lightgray" ) {
+                    allTargetsDisabled = 0;
+                    break;
+                }
+            }
+
+            if (allTargetsDisabled) {
+                clearInterval(timer);
+                stop();
+            }
+        }
     };
 }
 
