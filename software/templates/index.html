@@ -45,6 +45,16 @@ function stop() {
     stopTimer();
 }
 
+// reset gui to initial values
+function resetGUI() {
+    $("#score").html(0);
+    for (var i=0; i<4; i++) {
+        var targetId = "#target" + i;
+        $(targetId).html(0)
+        $(targetId).css({'background': 'lightgray'});
+    }
+}
+
 // start training
 function start() {
     var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
@@ -68,6 +78,7 @@ function start() {
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
     });
+    resetGUI();
     startTimer();
 }
 
@@ -169,14 +180,14 @@ $(document).ready(adjustTargetHeight());
             <option value="all">All targets</option>
             <option value="random">Random target</option>
         </select>
-        <label for="speed">Countdown speed:</label>
+        <label for="speed">Countdown rate:</label>
         <select id="countdownSpeed">
-            <option value="500">0.5 sec</option>
-            <option value="1000">1 sec</option>
+            <option value="100">100 msec</option>
+            <option value="250">250 msec</option>
+            <option value="500">500 msec</option>
+            <option value="1000" selected>1 sec</option>
             <option value="2000">2 sec</option>
-            <option value="3000">3 sec</option>
             <option value="4000">4 sec</option>
-            <option value="5000">5 sec</option>
         </select>
     </div>
 </div>
