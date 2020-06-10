@@ -17,7 +17,8 @@ class Controller():
         self.rsp = rsp.Rsp()
         self.terminate = False
         self.ser = serial.Serial(port=port, baudrate=baurate, parity=serial.PARITY_NONE,
-                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0.01)
+                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
+        self.buffer = []
 
     def set_target(self, tid, mode):
         """Set target mode"""
@@ -57,58 +58,58 @@ class Controller():
         payload = bytearray([opcode_value, msb, lsb])
         self.ser.write(payload)
 
-    def byte_from_serial(self):
-        """Read 1 byte from serial port"""
-        read_buffer = b''
-        while True:
-            byte_chunk = self.ser.read(1)
-            read_buffer += byte_chunk
-            if len(byte_chunk) == 1:
-                break
-        return int.from_bytes(read_buffer, byteorder='big')
+    def next_serial_char(self):
+        """Return the next character from the serial buffer"""
+        if len(self.buffer) == 0:
+            while len(self.buffer) == 0:
+                try:
+                    self.buffer = [x for x in self.ser.read(100)]
+                except serial.SerialException:
+                    # ignore this error
+                    #    raise SerialException('read failed: {}'.format(e))
+                    # serial.serialutil.SerialException: read failed: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+                    pass
+        c = self.buffer.pop(0)
+        return c
 
     def reader(self, queue):
         """method for reader thread"""
         while not self.terminate:
-            if self.ser.in_waiting:
-                data = self.byte_from_serial()
-                if data == self.rsp["RSP_HIT_STATUS"]:
-                    tid = self.byte_from_serial()
-                    val = self.byte_from_serial()
-                    queue.put(f"RSP_HIT_STATUS {tid} {val}")
-                elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
-                    tid = self.byte_from_serial()
-                    val = self.byte_from_serial()
-                    queue.put(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
-                elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
-                    msb = self.byte_from_serial()
-                    lsb = self.byte_from_serial()
-                    val = msb << 8 | lsb
-                    queue.put(f"RSP_SENSOR_THRESHOLD {val}")
-                elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
-                    msb = self.byte_from_serial()
-                    lsb = self.byte_from_serial()
-                    val = msb << 8 | lsb
-                    queue.put(f"RSP_RING_BRIGHTNESS {val}")
-                elif data == self.rsp["RSP_TIMER_INTERVAL"]:
-                    msb = self.byte_from_serial()
-                    lsb = self.byte_from_serial()
-                    val = msb << 8 | lsb
-                    queue.put(f"RSP_TIMER_INTERVAL {val}")
-                elif data == self.rsp["RSP_DEBUG_START"]:
-                    msg = ""
-                    while True:
-                        data = self.byte_from_serial()
-                        if data == self.rsp["RSP_DEBUG_END"]:
-                            queue.put(f"DEBUG: {msg}")
-                            break
-                        else:
-                            msg += chr(data)
-                else:
-                    queue.put(f"DEBUG: Unknown byte '{data}'")
-                    pass
+            data = self.next_serial_char()
+            if data == self.rsp["RSP_HIT_STATUS"]:
+                tid = self.next_serial_char()
+                val = self.next_serial_char()
+                queue.put(f"RSP_HIT_STATUS {tid} {val}")
+            elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
+                tid = self.next_serial_char()
+                val = self.next_serial_char()
+                queue.put(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
+            elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
+                msb = self.next_serial_char()
+                lsb = self.next_serial_char()
+                val = msb << 8 | lsb
+                queue.put(f"RSP_SENSOR_THRESHOLD {val}")
+            elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
+                msb = self.next_serial_char()
+                lsb = self.next_serial_char()
+                val = msb << 8 | lsb
+                queue.put(f"RSP_RING_BRIGHTNESS {val}")
+            elif data == self.rsp["RSP_TIMER_INTERVAL"]:
+                msb = self.next_serial_char()
+                lsb = self.next_serial_char()
+                val = msb << 8 | lsb
+                queue.put(f"RSP_TIMER_INTERVAL {val}")
+            elif data == self.rsp["RSP_DEBUG_START"]:
+                msg = ""
+                while True:
+                    data = self.next_serial_char()
+                    if data == self.rsp["RSP_DEBUG_END"]:
+                        queue.put(f"DEBUG: {msg}")
+                        break
+                    else:
+                        msg += chr(data)
             else:
-                time.sleep(0)  # yield
+                queue.put(f"ERROR: Unknown byte '{data}'")
         print("INFO: End of read thread")
 
     def writer(self, filename, loop=False):

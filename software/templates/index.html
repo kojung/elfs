@@ -18,6 +18,7 @@ var currentTime = 0;
 var elapsedTime = 0;
 var stopTime    = -1;
 var timer       = 0;
+var targetState = ['disabled', 'disabled', 'disabled', 'disabled'];
 
 // SSE
 function SSE() {
@@ -32,20 +33,27 @@ function SSE() {
             var targetId = "#target" + i;
             $(targetId).html(target.score);
             $(targetId).css({'background': target.color});
+            if (target.color == "lightgrey") {
+                targetState[i] = 'disabled';
+            } else {
+                targetState[i] = 'enabled';
+            }
         }
 
         // if all targets are disabled in countdown mode, stop the timer
         var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
+        console.log("chosenMode = " + chosenMode)
         if (chosenMode == "countdown") {
             var allTargetsDisabled = 1;
             for (var i=0; i<4; i++) {
-                var targetId = "#target" + i;
-                if ( $(targetId).css('background') != "lightgray" ) {
+                if ( targetState[i] == 'enabled' ) {
+                    console.log("target " + i + " has " + targetState[i])
                     allTargetsDisabled = 0;
                     break;
                 }
             }
 
+            console.log("allTargetsDisabled = " + allTargetsDisabled)
             if (allTargetsDisabled) {
                 clearInterval(timer);
                 stop();
@@ -116,11 +124,16 @@ function updateTimer() {
 
 function startTimer() {
     currentTime = +new Date();
+    if ( timer != 0 ) {
+        // stop previous timer first
+        clearInterval(timer);
+    }
     timer = setInterval(updateTimer, 10);
 }
 
 function stopTimer() {
     clearInterval(timer);
+    timer = 0;
 }
 
 // autoload these functions
