@@ -46,9 +46,8 @@ void setup() {
 }
 
 void debug(const String msg) {
-    Serial.print(RSP_DEBUG_START);
-    Serial.print(msg);
-    Serial.println(RSP_DEBUG_END);
+    Serial.print(RSP_DEBUG);
+    Serial.println(msg);
 }
 
 void loop() {
