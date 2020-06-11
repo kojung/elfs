@@ -27,20 +27,19 @@ class Controller():
         """Set target mode"""
         assert mode in ['ENABLED', 'TIMED', 'DISABLED']
         opcode_name  = f"CMD_SET_TARGET_{mode}"
-        opcode_value = self.cmd[opcode_name]
+        opcode_value = ord(self.cmd[opcode_name])
         payload      = bytearray([opcode_value] + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
     def run_self_test(self, tid):
         """Run self test"""
-        opcode  = self.cmd["CMD_RUN_SELF_TEST"]
-        print(f"opcode = '{opcode}'")
+        opcode  = ord(self.cmd["CMD_RUN_SELF_TEST"])
         payload = bytearray([opcode]) #  + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
     def poll_target(self, tid):
         """Poll target"""
-        opcode  = self.cmd["CMD_POLL_TARGET"]
+        opcode  = ord(self.cmd["CMD_POLL_TARGET"])
         payload = bytearray([opcode] + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
@@ -48,7 +47,7 @@ class Controller():
         """Get attribute"""
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_GET_{attr}"
-        opcode_value = self.cmd[opcode_name]
+        opcode_value = ord(self.cmd[opcode_name])
         payload = bytearray([opcode_value, "\n"])
         self.ser.write(payload)
 
@@ -56,7 +55,7 @@ class Controller():
         """Set attribute"""
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_SET_{attr}"
-        opcode_value = self.cmd[opcode_name]
+        opcode_value = ord(self.cmd[opcode_name])
         payload = bytearray([opcode] + self._int2bytearray(val) + ["\n"])
         self.ser.write(payload)
 
