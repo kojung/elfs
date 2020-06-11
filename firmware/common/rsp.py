@@ -22,20 +22,19 @@ class Rsp(dict):
     """Response protocol class"""
     def __init__(self):
         """Constructor"""
-        opcodes = """
-            RSP_HIT_STATUS
-            RSP_SENSOR_THRESHOLD
-            RSP_RING_BRIGHTNESS
-            RSP_TIMER_INTERVAL
-            RSP_DEBUG_START
-            RSP_DEBUG_END
-            RSP_COUNTDOWN_EXPIRED""".split()
-        for idx, opcode in enumerate(opcodes):
-            self[opcode] = 0x80 + idx
+        self.opcodes = {
+           "H": "RSP_HIT_STATUS",
+           "t": "RSP_SENSOR_THRESHOLD",
+           "b": "RSP_RING_BRIGHTNESS",
+           "i": "RSP_TIMER_INTERVAL",
+           "D": "RSP_DEBUG_START",
+           "d": "RSP_DEBUG_END",
+           "E": "RSP_COUNTDOWN_EXPIRED",
+        }
 
 if __name__ == '__main__':
     print("// This is auto-generated file. Do not edit manually!\n")
     print("#pragma once\n")
     c = Rsp()
-    for opcode, value in c.items():
-        print(f"#define {opcode} ({hex(value)})")
+    for opcode, name in c.opcodes.items():
+        print(f"#define {name} '{opcode}'")
