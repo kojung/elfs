@@ -27,8 +27,7 @@ class Rsp(dict):
            "t": "RSP_SENSOR_THRESHOLD",
            "b": "RSP_RING_BRIGHTNESS",
            "i": "RSP_TIMER_INTERVAL",
-           "D": "RSP_DEBUG_START",
-           "d": "RSP_DEBUG_END",
+           "D": "RSP_DEBUG",
            "E": "RSP_COUNTDOWN_EXPIRED",
         }
 

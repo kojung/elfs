@@ -43,7 +43,6 @@ The response protocol is composed of 3 fields:
 | RSP_RING_BRIGHTNESS   | brightness MSB     | brightness LSB     | Return ring brightness in response to CMD_GET_RING_BRIGHTNESS |
 | RSP_TIMER_INTERVAL    | timer interval MSB | timer interval LSB | Return timer interval in response to CMD_GET_TIMER_INTERVAL  |
 | RSP_COUNTDOWN_EXPIRED | target id          | bool               | True if target count down expired                            |
-| RSP_DEBUG_START       | n/a                | n/a                | Start of debug message                                       |
-| RSP_DEBUG_END         | n/a                | n/a                | End of debug message                                         |
+| RSP_DEBUG             | n/a                | n/a                | Start of debug message                                       |
 
 See [rsp.h](rsp.h) header file for `OPCODE` encoding.

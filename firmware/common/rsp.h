@@ -6,6 +6,5 @@
 #define RSP_SENSOR_THRESHOLD 't'
 #define RSP_RING_BRIGHTNESS 'b'
 #define RSP_TIMER_INTERVAL 'i'
-#define RSP_DEBUG_START 'D'
-#define RSP_DEBUG_END 'd'
+#define RSP_DEBUG 'D'
 #define RSP_COUNTDOWN_EXPIRED 'E'
