@@ -34,7 +34,7 @@ TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 void setup() {
     // enable serial
-    Serial.begin(57600);
+    Serial.begin(9600);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB port only
     }

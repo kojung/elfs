@@ -20,7 +20,7 @@ app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 
 # instantiate controller
 SERIAL         = '/dev/ttyUSB0'
-BAUDRATE       = 57600
+BAUDRATE       = 9600
 NUM_OF_TARGETS = 4
 
 # singleton that keeps track of shared state

@@ -22,9 +22,17 @@ class Controller():
         self.cmd = cmd.Cmd()
         self.rsp = rsp.Rsp()
         self.terminate = False
-        self.ser = serial.Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
-                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=None)
-        self.lock = threading.Lock()
+        self.ser = serial.Serial()
+        self.ser.port = port
+        self.ser.baudrate = baudrate
+        self.ser.timeout = 1
+        self.ser.setDTR(False)
+        self.ser.setRTS(False)
+        self.ser.open()
+        print("Starting serial communication.... please wait")
+        time.sleep(5)
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
 
     def set_target(self, tid, mode):
         """Set target mode"""
@@ -66,9 +74,7 @@ class Controller():
         """Return the next command from the serial link"""
         buf = ""
         while len(buf) == 0:
-            if self.ser.in_waiting > 0:
-                with self.lock:
-                    buf = self.ser.readline().decode('utf-8').strip()
+            buf = self.ser.read_until().decode('utf-8').strip()
         return buf
 
     def reader(self, queue):
@@ -158,7 +164,7 @@ if __name__ == '__main__':
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
     parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
-    parser.add_argument("-b", "--baudrate", default=57600, help="Serial port baudrate")
+    parser.add_argument("-b", "--baudrate", default=9600, help="Serial port baudrate")
     parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
     args = parser.parse_args()
     ctrl = Controller(args.serial, args.baudrate)

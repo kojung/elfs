@@ -59,8 +59,6 @@ class PracticeMode(TrainingMode):
         """process actions"""
         gui = self.state['gui']
 
-        print(f"practice/timed process(): cmd = {cmd}")
-
         # only process when in running state
         if self.status == "running":
             hit_status_match = re.search(r'RSP_HIT_STATUS\s+(\d+)\s+(\d+)', cmd)
@@ -117,7 +115,6 @@ class CountdownMode(TrainingMode):
         gui  = self.state['gui']
         ctrl = self.state['controller']
 
-        print(f"countdown process(): cmd = {cmd}")
         # only process when in running state
         if self.status == "running":
             hit_status_match = re.search(r'RSP_HIT_STATUS\s+(\d+)\s+(\d+)', cmd)
