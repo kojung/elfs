@@ -52,23 +52,23 @@ void debug(const String msg) {
 
 void loop() {
     if (Serial.available() > 0) {
-        String cmd = Serial.readString();
+        String cmd = Serial.readStringUntil('\n');
         char opcode = cmd[0];
         uint8_t tid, state;
         int value;
         switch(opcode) {
             case CMD_SET_TARGET_ENABLED:
-                tid = atoi(cmd[1]);
+                tid = cmd.substring(1).toInt();
                 targets[tid]->set_mode(TARGET_ENABLED);
                 break;
 
             case CMD_SET_TARGET_TIMED: 
-                tid = atoi(cmd[1]);
+                tid = cmd.substring(1).toInt();
                 targets[tid]->set_mode(TARGET_TIMED);
                 break;
 
             case CMD_SET_TARGET_DISABLED: 
-                tid = atoi(cmd[1]);
+                tid = cmd.substring(1).toInt();
                 targets[tid]->set_mode(TARGET_DISABLED);
                 break;
 
@@ -94,7 +94,7 @@ void loop() {
                 break;
 
             case CMD_RUN_SELF_TEST:
-                tid = atoi(cmd[1]);
+                tid = cmd.substring(1).toInt();
                 targets[tid]->run_self_test();
                 break;
 
@@ -117,7 +117,7 @@ void loop() {
                 break;
 
             case CMD_POLL_TARGET:
-                tid = atoi(cmd[1]);
+                tid = cmd.substring(1).toInt();
                 state = targets[tid]->get_hit_state();
                 Serial.print(RSP_HIT_STATUS);
                 Serial.print(tid);
