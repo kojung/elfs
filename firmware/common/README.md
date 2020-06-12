@@ -36,11 +36,13 @@ The response protocol is composed of 3 fields:
 * 1-byte ARG1
 * 1-byte ARG2
 
-| OPCODE [1 byte]      | ARG1 [1-byte]      | ARG2 [1-byte]      | Meaning                                                      |
-| -------------------- | ------------------ | ------------------ | ------------------------------------------------------------ |
-| RSP_HIT_STATUS       | target id          | bool               | True if target is hit                                        |
-| RSP_SENSOR_THRESHOLD | threshold MSB      | threshold LSB      | Return sensor threshold in response to CMD_GET_SENSOR_THRESHOLD |
-| RSP_RING_BRIGHTNESS  | brightness MSB     | brightness LSB     | Return ring brightness in response to CMD_GET_RING_BRIGHTNESS |
-| RSP_TIMER_INTERVAL   | timer interval MSB | timer interval LSB | Return timer interval in response to CMD_GET_TIMER_INTERVAL  |
+| OPCODE [1 byte]       | ARG1 [1-byte]      | ARG2 [1-byte]      | Meaning                                                      |
+| --------------------- | ------------------ | ------------------ | ------------------------------------------------------------ |
+| RSP_HIT_STATUS        | target id          | bool               | True if target is hit                                        |
+| RSP_SENSOR_THRESHOLD  | threshold MSB      | threshold LSB      | Return sensor threshold in response to CMD_GET_SENSOR_THRESHOLD |
+| RSP_RING_BRIGHTNESS   | brightness MSB     | brightness LSB     | Return ring brightness in response to CMD_GET_RING_BRIGHTNESS |
+| RSP_TIMER_INTERVAL    | timer interval MSB | timer interval LSB | Return timer interval in response to CMD_GET_TIMER_INTERVAL  |
+| RSP_COUNTDOWN_EXPIRED | target id          | bool               | True if target count down expired                            |
+| RSP_DEBUG             | n/a                | n/a                | Start of debug message                                       |
 
 See [rsp.h](rsp.h) header file for `OPCODE` encoding.

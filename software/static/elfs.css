@@ -1,0 +1,46 @@
+.elfs-target {
+    width: 70%;
+    -webkit-border-radius: 100%;
+    -moz-border-radius: 100%;
+    border-radius: 100%;
+    background: lightgray;
+    font-size: 500%;
+    line-height: 200%;
+}
+
+.elfs-mode {
+    width: 33%;
+    font-size: 300%;
+}
+
+.elfs-button {
+    width: 100%;
+    font-size: 400%;
+}
+
+.elfs-button-start {
+    background-color: green;
+}
+
+.elfs-button-stop {
+    background-color: red;
+}
+
+.elfs-timer {
+    font-size: 400%;
+}
+
+.elfs-score {
+    font-size: 400%;
+}
+
+.elfs-mode-desc {
+    margin: 10px;
+    text-align: center;
+    font-size: 200%;
+}
+
+body {
+    padding-left: 20px;
+    padding-right: 20px;
+}

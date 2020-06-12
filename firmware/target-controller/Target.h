@@ -39,7 +39,9 @@ class Target : public TargetBase {
     /** Update target
     * Read the sensor and update internal state. Call this function
     * inside the Arduino main loop as fast as possible.
-    * @return value that triggered the target, -1 if target was not triggered
+    * @return value > 0 if target is hit. value represents the LDR value
+    * @return value == 0 if target is not hit
+    * @return value < 0 if value is not hit but count down timer expired
     */
     int update() override;
 
@@ -101,12 +103,13 @@ int Target<LED, LDR, TRIGGER>::update() {
                 // if timer expired, disable the target
                 if (led_counter_ == 0) {
                     set_mode(TARGET_DISABLED);
+                    return -1;
                 }
             }
         }
     }
     // no state changes
-    return -1;
+    return 0;
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 
 # 
 # Extensible Laser Firing System - ELFS
@@ -22,19 +22,16 @@ class Rsp(dict):
     """Response protocol class"""
     def __init__(self):
         """Constructor"""
-        opcodes = """
-            RSP_HIT_STATUS
-            RSP_SENSOR_THRESHOLD
-            RSP_RING_BRIGHTNESS
-            RSP_TIMER_INTERVAL
-            RSP_DEBUG_START
-            RSP_DEBUG_END""".split()
-        for idx, opcode in enumerate(opcodes):
-            self[opcode] = 0x80 + idx
+        self["RSP_HIT_STATUS"]        = "H"
+        self["RSP_SENSOR_THRESHOLD"]  = "t"
+        self["RSP_RING_BRIGHTNESS"]   = "b"
+        self["RSP_TIMER_INTERVAL"]    = "i"
+        self["RSP_DEBUG"]             = "D"
+        self["RSP_COUNTDOWN_EXPIRED"] = "E"
 
 if __name__ == '__main__':
     print("// This is auto-generated file. Do not edit manually!\n")
     print("#pragma once\n")
     c = Rsp()
-    for opcode, value in c.items():
-        print(f"#define {opcode} ({hex(value)})")
+    for name, opcode in c.items():
+        print(f"#define {name} '{opcode}'")
