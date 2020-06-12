@@ -24,6 +24,7 @@ class Controller():
         self.terminate = False
         self.ser = serial.Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
                                  stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=None)
+        self.lock = threading.Lock()
 
     def set_target(self, tid, mode):
         """Set target mode"""
@@ -65,7 +66,9 @@ class Controller():
         """Return the next command from the serial link"""
         buf = ""
         while len(buf) == 0:
-            buf = self.ser.readline().decode('utf-8').strip()
+            if self.ser.in_waiting > 0:
+                with self.lock:
+                    buf = self.ser.readline().decode('utf-8').strip()
         return buf
 
     def reader(self, queue):
