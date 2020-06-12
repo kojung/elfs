@@ -22,24 +22,21 @@ class Cmd(dict):
     """Command protocol class"""
     def __init__(self):
         """Constructor"""
-        opcodes = """
-            CMD_SET_TARGET_ENABLED
-            CMD_SET_TARGET_TIMED
-            CMD_SET_TARGET_DISABLED
-            CMD_RUN_SELF_TEST
-            CMD_POLL_TARGET 
-            CMD_SET_SENSOR_THRESHOLD
-            CMD_GET_SENSOR_THRESHOLD
-            CMD_SET_RING_BRIGHTNESS
-            CMD_GET_RING_BRIGHTNESS
-            CMD_SET_TIMER_INTERVAL
-            CMD_GET_TIMER_INTERVAL""".split()
-        for idx, opcode in enumerate(opcodes):
-            self[opcode] = 0x80 + idx
+        self["CMD_SET_TARGET_ENABLED"]   = "E"
+        self["CMD_SET_TARGET_TIMED"]     = "M"
+        self["CMD_SET_TARGET_DISABLED"]  = "D"
+        self["CMD_RUN_SELF_TEST"]        = "R"
+        self["CMD_POLL_TARGET "]         = "P"
+        self["CMD_SET_SENSOR_THRESHOLD"] = "T"
+        self["CMD_GET_SENSOR_THRESHOLD"] = "t"
+        self["CMD_SET_RING_BRIGHTNESS"]  = "B"
+        self["CMD_GET_RING_BRIGHTNESS"]  = "b"
+        self["CMD_SET_TIMER_INTERVAL"]   = "I"
+        self["CMD_GET_TIMER_INTERVAL"]   = "i"
 
 if __name__ == '__main__':
     print("// This is auto-generated file. Do not edit manually!\n")
     print("#pragma once\n")
     c = Cmd()
-    for opcode, value in c.items():
-        print(f"#define {opcode} ({hex(value)})")
+    for name, opcode in c.items():
+        print(f"#define {name} '{opcode}'")

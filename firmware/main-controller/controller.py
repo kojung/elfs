@@ -10,34 +10,38 @@ from queue import Queue
 import cmd
 import rsp
 
+def int2bytearray(n):
+    """Convert an integer into bytearray representing the string version of the integer"""
+    return [ord(x) for x in str(n)]
+
 class Controller():
-    def __init__(self, port, baurate):
+    def __init__(self, port, baudrate):
         """Constructor"""
         self.cmd = cmd.Cmd()
         self.rsp = rsp.Rsp()
         self.terminate = False
-        self.ser = serial.Serial(port=port, baudrate=baurate, parity=serial.PARITY_NONE,
-                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
-        self.buffer = []
+        self.ser = serial.Serial(port=port, baudrate=baudrate, parity=serial.PARITY_NONE,
+                                 stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=None)
 
     def set_target(self, tid, mode):
         """Set target mode"""
         assert mode in ['ENABLED', 'TIMED', 'DISABLED']
         opcode_name  = f"CMD_SET_TARGET_{mode}"
         opcode_value = self.cmd[opcode_name]
-        payload      = bytearray([opcode_value, tid])
+        payload      = bytearray([opcode_value] + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
     def run_self_test(self, tid):
         """Run self test"""
-        opcode  = self.cmd[f"CMD_RUN_SELF_TEST"]
-        payload = bytearray([opcode, tid])
+        opcode  = self.cmd["CMD_RUN_SELF_TEST"]
+        print(f"opcode = '{opcode}'")
+        payload = bytearray([opcode]) #  + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
     def poll_target(self, tid):
         """Poll target"""
-        opcode  = self.cmd[f"CMD_POLL_TARGET"]
-        payload = bytearray([opcode, tid])
+        opcode  = self.cmd["CMD_POLL_TARGET"]
+        payload = bytearray([opcode] + int2bytearray(tid) + ["\n"])
         self.ser.write(payload)
 
     def get(self, attr):
@@ -45,7 +49,7 @@ class Controller():
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_GET_{attr}"
         opcode_value = self.cmd[opcode_name]
-        payload = bytearray([opcode_value])
+        payload = bytearray([opcode_value, "\n"])
         self.ser.write(payload)
 
     def set(self, attr, val):
@@ -53,64 +57,40 @@ class Controller():
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_SET_{attr}"
         opcode_value = self.cmd[opcode_name]
-        msb = (val >> 8) & 0xFF
-        lsb = val & 0xFF
-        payload = bytearray([opcode_value, msb, lsb])
+        payload = bytearray([opcode] + self._int2bytearray(val) + ["\n"])
         self.ser.write(payload)
 
-    def next_serial_char(self):
-        """Return the next character from the serial buffer"""
-        if len(self.buffer) == 0:
-            while len(self.buffer) == 0:
-                try:
-                    self.buffer = [x for x in self.ser.read(100)]
-                except serial.serialutil.SerialException as e:
-                    # ignore this error
-                    #    raise SerialException('read failed: {}'.format(e))
-                    # serial.serialutil.SerialException: read failed: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
-                    print(f"exception: {e}")
-                    pass
-        c = self.buffer.pop(0)
-        return c
+    def next_cmd(self):
+        """Return the next command from the serial link"""
+        self.ser.readline().decode('utf-8').strip().split()
 
     def reader(self, queue):
         """method for reader thread"""
         while not self.terminate:
-            data = self.next_serial_char()
-            if data == self.rsp["RSP_HIT_STATUS"]:
-                tid = self.next_serial_char()
-                val = self.next_serial_char()
+            tokens = self.next_cmd()
+            opcode = tokens[0]
+            if opcode == self.rsp["RSP_HIT_STATUS"]:
+                tid = tokens[1]
+                val = tokens[2]
                 queue.put(f"RSP_HIT_STATUS {tid} {val}")
-            elif data == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
-                tid = self.next_serial_char()
-                val = self.next_serial_char()
+            elif opcode == self.rsp["RSP_COUNTDOWN_EXPIRED"]:
+                tid = tokens[1]
+                val = tokens[2]
                 queue.put(f"RSP_COUNTDOWN_EXPIRED {tid} {val}")
-            elif data == self.rsp["RSP_SENSOR_THRESHOLD"]:
-                msb = self.next_serial_char()
-                lsb = self.next_serial_char()
-                val = msb << 8 | lsb
+            elif opcode == self.rsp["RSP_SENSOR_THRESHOLD"]:
+                val = tokens[1:]
                 queue.put(f"RSP_SENSOR_THRESHOLD {val}")
-            elif data == self.rsp["RSP_RING_BRIGHTNESS"]:
-                msb = self.next_serial_char()
-                lsb = self.next_serial_char()
-                val = msb << 8 | lsb
+            elif opcode == self.rsp["RSP_RING_BRIGHTNESS"]:
+                val = tokens[1:]
                 queue.put(f"RSP_RING_BRIGHTNESS {val}")
-            elif data == self.rsp["RSP_TIMER_INTERVAL"]:
-                msb = self.next_serial_char()
-                lsb = self.next_serial_char()
-                val = msb << 8 | lsb
+            elif opcode == self.rsp["RSP_TIMER_INTERVAL"]:
+                val = tokens[1:]
                 queue.put(f"RSP_TIMER_INTERVAL {val}")
-            elif data == self.rsp["RSP_DEBUG_START"]:
-                msg = ""
-                while True:
-                    data = self.next_serial_char()
-                    if data == self.rsp["RSP_DEBUG_END"]:
-                        queue.put(f"DEBUG: {msg}")
-                        break
-                    else:
-                        msg += chr(data)
+            elif opcode == self.rsp["RSP_DEBUG"]:
+                msg = tokens[1:]
+                queue.put(f"DEBUG: {msg}")
             else:
-                queue.put(f"ERROR: Unknown byte '{data}'")
+                queue.put(f"ERROR: Unknown opcode '{opcode}'")
         print("INFO: End of read thread")
 
     def writer(self, filename, loop=False):
@@ -171,7 +151,7 @@ if __name__ == '__main__':
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-i", "--input", required=True, help="Input file containing target controller commands")
     parser.add_argument("-l", "--loop", default=False, action='store_true', help="Replay the input file in a loop")
-    parser.add_argument("-b", "--baudrate", default=9600, help="Serial port baudrate")
+    parser.add_argument("-b", "--baudrate", default=57600, help="Serial port baudrate")
     parser.add_argument("-s", "--serial", default="/dev/ttyUSB0", help="Serial port")
     args = parser.parse_args()
     ctrl = Controller(args.serial, args.baudrate)
