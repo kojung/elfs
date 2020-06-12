@@ -14,6 +14,8 @@ def int2bytearray(n):
     """Convert an integer into bytearray representing the string version of the integer"""
     return [ord(x) for x in str(n)]
 
+newline = [ord(x) for x in ["\n"]]
+
 class Controller():
     def __init__(self, port, baudrate):
         """Constructor"""
@@ -28,19 +30,19 @@ class Controller():
         assert mode in ['ENABLED', 'TIMED', 'DISABLED']
         opcode_name  = f"CMD_SET_TARGET_{mode}"
         opcode_value = ord(self.cmd[opcode_name])
-        payload      = bytearray([opcode_value] + int2bytearray(tid) + ["\n"])
+        payload      = bytearray([opcode_value] + int2bytearray(tid) + newline)
         self.ser.write(payload)
 
     def run_self_test(self, tid):
         """Run self test"""
         opcode  = ord(self.cmd["CMD_RUN_SELF_TEST"])
-        payload = bytearray([opcode]) #  + int2bytearray(tid) + ["\n"])
+        payload = bytearray([opcode] + int2bytearray(tid) + newline)
         self.ser.write(payload)
 
     def poll_target(self, tid):
         """Poll target"""
         opcode  = ord(self.cmd["CMD_POLL_TARGET"])
-        payload = bytearray([opcode] + int2bytearray(tid) + ["\n"])
+        payload = bytearray([opcode] + int2bytearray(tid) + newline)
         self.ser.write(payload)
 
     def get(self, attr):
@@ -48,7 +50,7 @@ class Controller():
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_GET_{attr}"
         opcode_value = ord(self.cmd[opcode_name])
-        payload = bytearray([opcode_value, "\n"])
+        payload = bytearray([opcode_value] + newline)
         self.ser.write(payload)
 
     def set(self, attr, val):
@@ -56,12 +58,15 @@ class Controller():
         assert attr in ['SENSOR_THRESHOLD', 'RING_BRIGHTNESS', 'TIMER_INTERVAL']
         opcode_name  = f"CMD_SET_{attr}"
         opcode_value = ord(self.cmd[opcode_name])
-        payload = bytearray([opcode] + self._int2bytearray(val) + ["\n"])
+        payload = bytearray([opcode_value] + int2bytearray(val) + newline)
         self.ser.write(payload)
 
     def next_cmd(self):
         """Return the next command from the serial link"""
-        self.ser.readline().decode('utf-8').strip().split()
+        buf = ""
+        while len(buf) == 0:
+            buf = self.ser.readline().decode('utf-8').strip()
+        return buf
 
     def reader(self, queue):
         """method for reader thread"""
