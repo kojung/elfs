@@ -136,6 +136,10 @@ def start():
     state['queue'].put("REFRESH")
     return jsonify(result="OK")
 
+@app.route('/stats')
+def stats():
+    return render_template('stats.html')
+
 def test_thread(state):
     queue = state['queue']
     time.sleep(5)

@@ -1,0 +1,49 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}
+Extensible Laser Firing System
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='elfs.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script language="JavaScript">
+
+</script>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center"><img src="static/logo.png" alt="logo" width="8%" height="auto"> Extensible Laser Firing System</h1>
+
+<ul class="nav nav-tabs" id="elfs-nav-tabs">
+    <li role="presentation" class="active text-center elfs-mode" id="practice">
+        <a href="#practice-content" data-toggle="tab">Practice</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="timed">
+        <a href="#timed-content" data-toggle="tab">Timed</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="countdown">
+        <a href="#countdown-content" data-toggle="tab">Countdown</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="practice-content" class="tab-pane fade in active elfs-mode-desc">
+        <div>Practice mode</div>
+    </div>
+      
+    <div id="timed-content" class="tab-pane fade in elfs-mode-desc">
+        <div>Timed mode</div>
+    </div>
+
+    <div id="countdown-content" class="tab-pane fade in elfs-mode-desc">
+        <div>Count down</div>
+    </div>
+</div>
+
+{% endblock %}
+
