@@ -61,7 +61,11 @@ function SSE() {
 
 // stop training
 function stop() {
-    var params = {"elapsedTime": elapsedTime}
+    var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
+    var user       = $("#user").val()
+    var distance   = $("#distance option:selected").attr("value")
+    var totalScore = $("#score").text()
+    var params = {"user": user, "mode": chosenMode, "distance": distance, "totalScore": totalScore, "elapsedTime": elapsedTime}
     $.getJSON($SCRIPT_ROOT + '/stop', params, function(data) {
         console.log("stop: " + data.result)
     });
@@ -75,18 +79,18 @@ function start() {
     // build parameters for chosen mode
     if ( chosenMode == "practice" ) {
         var refreshMode = $("#practiceRefreshMode option:selected").attr("value")
-        var params = {"mode": chosenMode, "refreshMode": refreshMode}
-        stopTime = -1;
+        var params      = {"mode": chosenMode, "refreshMode": refreshMode}
+        stopTime        = -1;
     } else if ( chosenMode == "timed" ) {
         var refreshMode = $("#timedRefreshMode option:selected").attr("value")
-        var duration = $("#timedDuration option:selected").attr("value")
-        var params = {"mode": chosenMode, "refreshMode": refreshMode}
+        var duration    = $("#timedDuration option:selected").attr("value")
+        var params      = {"mode": chosenMode, "refreshMode": refreshMode}
         stopTime = duration * 100;
     } else if ( chosenMode == "countdown" ) {
         var refreshMode = $("#countdownRefreshMode option:selected").attr("value")
-        var speed = $("#countdownSpeed option:selected").attr("value")
-        var params = {"mode": chosenMode, "refreshMode": refreshMode, "countdownSpeed": speed}
-        stopTime = -1;
+        var speed       = $("#countdownSpeed option:selected").attr("value")
+        var params      = {"mode": chosenMode, "refreshMode": refreshMode, "countdownSpeed": speed}
+        stopTime        = -1;
     }
     $.getJSON($SCRIPT_ROOT + '/start', params, function(data) {
         console.log("start: " + data.result)
@@ -230,10 +234,10 @@ $(document).ready(adjustTargetHeight());
         </div>
     </div></div>
     <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-timer">
-        Timer<div id="timer">n/a</div>
+        Timer<div id="timer">0</div>
     </div></div>
     <div class="col-sm-4"><div class="col-sm-12 align-middle text-center elfs-score">
-        Score<div id="score">n/a</div>
+        Score<div id="score">0</div>
     </div></div>
 </div>
 

@@ -103,10 +103,15 @@ def index():
 
 @app.route('/stop', methods=['GET'])
 def stop():
-    elased_time = request.args.get('elapsedTime')
+    user         = request.args.get('user')
+    mode         = request.args.get('mode')
+    distance     = request.args.get('distance')
+    total_score  = request.args.get('totalScore')
+    elapsed_time = request.args.get('elapsedTime')
+    print(f"{user}, {mode}, {distance}, {total_score}, {elapsed_time}")
     training[state['mode']].stop()
     state['queue'].put("REFRESH")
-    return jsonify(result=f"mode={state['mode']}, elased_time={elased_time}")
+    return jsonify(result="OK")
 
 @app.route('/start', methods=['GET'])
 def start():
@@ -126,7 +131,7 @@ def start():
 
     # push a refresh token into the queue so GUI state gets refreshed
     state['queue'].put("REFRESH")
-    return jsonify(result=f"mode={state['mode']}")
+    return jsonify(result="OK")
 
 def test_thread(state):
     queue = state['queue']
