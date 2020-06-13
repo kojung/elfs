@@ -106,11 +106,12 @@ def index():
 def stop():
     user         = request.args.get('user')
     mode         = request.args.get('mode')
+    variant      = request.args.get('variant')
     distance     = request.args.get('distance')
     total_score  = request.args.get('totalScore')
     elapsed_time = request.args.get('elapsedTime')
     db           = DB()
-    db.add(user, mode, distance, elapsed_time, total_score)
+    db.add(user, mode, variant, distance, elapsed_time, total_score)
     training[state['mode']].stop()
     state['queue'].put("REFRESH")
     return jsonify(result="OK")

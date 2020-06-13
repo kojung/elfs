@@ -11,7 +11,7 @@ class DB():
         else:
             self.db = {}
 
-    def add(self, user, mode, distance, time, score):
+    def add(self, user, mode, variant, distance, time, score):
         """Add an entry into the database"""
         # only store if user is defined
         name = user if user != "" else "noname"
@@ -22,10 +22,13 @@ class DB():
         if mode not in self.db[name]:
             self.db[name][mode] = {}
 
-        if distance not in self.db[name][mode]:
-            self.db[name][mode][distance] = []
+        if variant not in self.db[name][mode]:
+            self.db[name][mode][variant] = {}
 
-        self.db[name][mode][distance].append((time, score))
+        if distance not in self.db[name][mode][variant]:
+            self.db[name][mode][variant][distance] = []
+
+        self.db[name][mode][variant][distance].append((time, score))
         
         with open(self.filename, "wb") as f:
             pickle.dump(self.db, f)

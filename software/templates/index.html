@@ -62,10 +62,24 @@ function SSE() {
 // stop training
 function stop() {
     var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
+    if ( chosenMode == "practice" ) {
+        var variant = ""
+    } else if ( chosenMode == "timed" ) {
+        var variant = $("#timedDuration option:selected").attr("value")
+    } else if ( chosenMode == "countdown" ) {
+        var variant = $("#countdownSpeed option:selected").attr("value")
+    }
     var user       = $("#user").val()
     var distance   = $("#distance option:selected").attr("value")
     var totalScore = $("#score").text()
-    var params = {"user": user, "mode": chosenMode, "distance": distance, "totalScore": totalScore, "elapsedTime": elapsedTime}
+    var params = {
+        "user": user,
+        "mode": chosenMode,
+        "variant": variant,
+        "distance": distance,
+        "totalScore": totalScore,
+        "elapsedTime": elapsedTime
+    }
     $.getJSON($SCRIPT_ROOT + '/stop', params, function(data) {
         console.log("stop: " + data.result)
     });
