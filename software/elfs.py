@@ -99,6 +99,7 @@ def index():
 def stop():
     elased_time = request.args.get('elapsedTime')
     training[state['mode']].stop()
+    state['queue'].put("REFRESH")
     return jsonify(result=f"mode={state['mode']}, elased_time={elased_time}")
 
 @app.route('/start', methods=['GET'])
@@ -117,8 +118,8 @@ def start():
     else:
         training[state['mode']].start(refresh_mode)
 
-    # push a dummy token into the queue so GUI state gets refreshed
-    state['queue'].put("DUMMY")
+    # push a refresh token into the queue so GUI state gets refreshed
+    state['queue'].put("REFRESH")
     return jsonify(result=f"mode={state['mode']}")
 
 def test_thread(state):

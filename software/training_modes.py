@@ -16,6 +16,12 @@ class TrainingMode():
     def stop(self):
         """stop the training"""
         self.status = 'stopped'
+        gui = self.state['gui']
+        ctrl = self.state['controller']
+        num_targets = len(gui['target'])
+        for i in range(num_targets):
+            ctrl.set_target(i, 'DISABLED')
+            gui['target'][i]['color'] = 'lightgray'
 
     def process(self, cmd):
         """process an action from the action queue"""
