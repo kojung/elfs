@@ -11,12 +11,10 @@ import logging
 from logging import info, debug
 
 FORMAT = "%(asctime)s [%(filename)s:%(lineno)s %(funcName)s()] %(message)s"
-logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 import cmd
 import rsp
-
-DEBUG = True
 
 def int2bytearray(n):
     """Convert an integer into bytearray representing the string version of the integer"""
