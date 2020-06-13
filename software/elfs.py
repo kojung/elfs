@@ -11,6 +11,7 @@ import os.path
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
+from db import DB
 
 # instantiate the app
 app = Flask("ELFS")
@@ -108,7 +109,8 @@ def stop():
     distance     = request.args.get('distance')
     total_score  = request.args.get('totalScore')
     elapsed_time = request.args.get('elapsedTime')
-    print(f"{user}, {mode}, {distance}, {total_score}, {elapsed_time}")
+    db           = DB()
+    db.add(user, mode, distance, elapsed_time, total_score)
     training[state['mode']].stop()
     state['queue'].put("REFRESH")
     return jsonify(result="OK")
