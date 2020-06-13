@@ -8,6 +8,7 @@ import threading
 import atexit
 import random
 import os.path
+import json
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
@@ -138,7 +139,8 @@ def start():
 
 @app.route('/stats')
 def stats():
-    return render_template('stats.html')
+    db = DB()
+    return render_template('stats.html', db=db.db)
 
 def test_thread(state):
     queue = state['queue']

@@ -11,14 +11,18 @@ Extensible Laser Firing System
 {% block scripts %}
 {{super()}}
 <script language="JavaScript">
-
+DB = {{ db|tojson|safe }}
 </script>
 {% endblock %}
 
 {% block content %}
 
 <h1 class="text-center"><img src="static/logo.png" alt="logo" width="8%" height="auto"> Extensible Laser Firing System</h1>
-
+<div>
+    <label for="user">User</label>
+    <select id="user">
+    </select>
+</div>
 <ul class="nav nav-tabs" id="elfs-nav-tabs">
     <li role="presentation" class="active text-center elfs-mode" id="practice">
         <a href="#practice-content" data-toggle="tab">Practice</a>
