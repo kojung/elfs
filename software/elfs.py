@@ -7,6 +7,7 @@ import time
 import threading
 import atexit
 import random
+import os.path
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
@@ -51,6 +52,11 @@ training = {
 # start controller thread
 reader_tid = threading.Thread(target=state['controller'].reader, args=[state['queue']])
 reader_tid.start()
+
+# load default settings
+rootdir = os.path.dirname(__file__)
+default_cfg = os.path.join(rootdir, "default.cfg")
+state['controller'].writer(default_cfg, loop=False)
 
 def shutdown():
     """shutdown app gracefully"""
@@ -99,6 +105,7 @@ def index():
 def stop():
     elased_time = request.args.get('elapsedTime')
     training[state['mode']].stop()
+    state['queue'].put("REFRESH")
     return jsonify(result=f"mode={state['mode']}, elased_time={elased_time}")
 
 @app.route('/start', methods=['GET'])
@@ -117,8 +124,8 @@ def start():
     else:
         training[state['mode']].start(refresh_mode)
 
-    # push a dummy token into the queue so GUI state gets refreshed
-    state['queue'].put("DUMMY")
+    # push a refresh token into the queue so GUI state gets refreshed
+    state['queue'].put("REFRESH")
     return jsonify(result=f"mode={state['mode']}")
 
 def test_thread(state):
