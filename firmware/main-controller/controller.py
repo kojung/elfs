@@ -52,13 +52,14 @@ class Controller():
 
     def _recv(self):
         """Return the next command from the serial link"""
-        buf = ""
-        while len(buf) == 0 or buf[-1] != '\n':
+        buf = b''
+        while len(buf) == 0 or buf[-1] != 10:  # 10 == "\n"
             with self.lock:
-                buf = self.ser.read_until()
+                buf += self.ser.read_until()
             time.sleep(0.1)
             if len(buf) > 0:
-                debug(f"buf = {buf}")
+                debug(f"received '{buf}' (end of transmission=%s, lastChar=%s)" % (buf[-1] == 10, buf[-1]))
+        debug(f"returning '{buf}'")
         return buf.decode('utf-8').strip()
 
     def set_target(self, tid, mode):
@@ -123,7 +124,7 @@ class Controller():
                 msg = tokens[1:]
                 queue.put(f"DEBUG: {msg}")
             else:
-                queue.put(f"ERROR: Unknown opcode '{opcode}'")
+                debug("Unknown opcode '{opcode}'")
         info("End of read thread")
 
     def writer(self, filename, loop=False):
