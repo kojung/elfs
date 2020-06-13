@@ -6,9 +6,17 @@ import serial
 import re
 import time
 from queue import Queue
+from datetime import datetime
+import logging
+from logging import info, debug
+
+FORMAT = "%(asctime)s [%(filename)s:%(lineno)s %(funcName)s()] %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 import cmd
 import rsp
+
+DEBUG = True
 
 def int2bytearray(n):
     """Convert an integer into bytearray representing the string version of the integer"""
@@ -25,14 +33,33 @@ class Controller():
         self.ser = serial.Serial()
         self.ser.port = port
         self.ser.baudrate = baudrate
-        self.ser.timeout = 1
+        self.ser.timeout = 0.1
         self.ser.setDTR(False)
         self.ser.setRTS(False)
         self.ser.open()
-        print("Starting serial communication.... please wait")
+        self.lock = threading.Lock()
+        info("Starting serial communication.... please wait")
         time.sleep(5)
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
+
+    def _send(self, payload):
+        """serial wrapper"""
+        debug(f"trying to acquire lock")
+        with self.lock:
+            debug(f"acquired lock")
+            self.ser.write(payload)
+
+    def _recv(self):
+        """Return the next command from the serial link"""
+        buf = ""
+        while len(buf) == 0 or buf[-1] != '\n':
+            with self.lock:
+                buf = self.ser.read_until()
+            time.sleep(0.1)
+            if len(buf) > 0:
+                debug(f"buf = {buf}")
+        return buf.decode('utf-8').strip()
 
     def set_target(self, tid, mode):
         """Set target mode"""
@@ -40,19 +67,19 @@ class Controller():
         opcode_name  = f"CMD_SET_TARGET_{mode}"
         opcode_value = ord(self.cmd[opcode_name])
         payload      = bytearray([opcode_value] + int2bytearray(tid) + newline)
-        self.ser.write(payload)
+        self._send(payload)
 
     def run_self_test(self, tid):
         """Run self test"""
         opcode  = ord(self.cmd["CMD_RUN_SELF_TEST"])
         payload = bytearray([opcode] + int2bytearray(tid) + newline)
-        self.ser.write(payload)
+        self._send(payload)
 
     def poll_target(self, tid):
         """Poll target"""
         opcode  = ord(self.cmd["CMD_POLL_TARGET"])
         payload = bytearray([opcode] + int2bytearray(tid) + newline)
-        self.ser.write(payload)
+        self._send(payload)
 
     def get(self, attr):
         """Get attribute"""
@@ -60,7 +87,7 @@ class Controller():
         opcode_name  = f"CMD_GET_{attr}"
         opcode_value = ord(self.cmd[opcode_name])
         payload = bytearray([opcode_value] + newline)
-        self.ser.write(payload)
+        self._send(payload)
 
     def set(self, attr, val):
         """Set attribute"""
@@ -68,19 +95,12 @@ class Controller():
         opcode_name  = f"CMD_SET_{attr}"
         opcode_value = ord(self.cmd[opcode_name])
         payload = bytearray([opcode_value] + int2bytearray(val) + newline)
-        self.ser.write(payload)
-
-    def next_cmd(self):
-        """Return the next command from the serial link"""
-        buf = ""
-        while len(buf) == 0:
-            buf = self.ser.read_until().decode('utf-8').strip()
-        return buf
+        self._send(payload)
 
     def reader(self, queue):
         """method for reader thread"""
         while not self.terminate:
-            tokens = self.next_cmd()
+            tokens = self._recv()
             opcode = tokens[0]
             if opcode == self.rsp["RSP_HIT_STATUS"]:
                 tid = tokens[1]
@@ -104,7 +124,7 @@ class Controller():
                 queue.put(f"DEBUG: {msg}")
             else:
                 queue.put(f"ERROR: Unknown opcode '{opcode}'")
-        print("INFO: End of read thread")
+        info("End of read thread")
 
     def writer(self, filename, loop=False):
         """method for reader thread"""
@@ -157,7 +177,7 @@ class Controller():
                 while sys.stdin in select.select([sys.stdin], [], [], 2)[0]:
                     ignore = sys.stdin.readline()
                     execute(lines)
-        print("INFO: End of writer thread")
+        info("End of writer thread")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='ELFS main controller',
@@ -176,7 +196,7 @@ if __name__ == '__main__':
     t2.start()
     try:
         while True:
-            print(queue.get())
+            info(queue.get())
 
     except KeyboardInterrupt:
         # terminate threads gracefully
