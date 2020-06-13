@@ -39,7 +39,7 @@ class Controller():
         self.ser.open()
         self.lock = threading.Lock()
         info("Starting serial communication.... please wait")
-        time.sleep(5)
+        time.sleep(2)
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
 
@@ -166,6 +166,7 @@ class Controller():
         time.sleep(2)
 
         # execute the command from the user
+        info(f"Loading configuration from file {filename}")
         with open(filename, 'r') as f:
             lines = [l.strip() for l in f.readlines()]
         execute(lines)
@@ -178,7 +179,7 @@ class Controller():
                 while sys.stdin in select.select([sys.stdin], [], [], 2)[0]:
                     ignore = sys.stdin.readline()
                     execute(lines)
-        info("End of writer thread")
+            info("End of writer thread")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='ELFS main controller',
