@@ -73,6 +73,7 @@ def shutdown():
 def process_queue(state):
     """pop data from queue and perform necessary state updates"""
     cmd = state['queue'].get()
+    # print(f"process_queue(): got cmd = {cmd}")
     training[state['mode']].process(cmd)
 
 @app.route('/sse')
