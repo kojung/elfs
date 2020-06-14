@@ -11,6 +11,10 @@ Extensible Laser Firing System
 {% block scripts %}
 {{super()}}
 <script language="JavaScript">
+
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+
 // database
 DB = {{ db|tojson|safe }}
 
@@ -29,12 +33,14 @@ function init() {
     }
     $("#user").change(updateChart);
     $('a[data-toggle="tab"]').on('shown.bs.tab', updateChart);
+    updateChart();
 }
 
 // autoload these functions
 $(document).ready(init);
-
 </script>
+
+<script src="static/Chart.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -69,6 +75,10 @@ $(document).ready(init);
     <div id="countdown" class="tab-pane fade in elfs-mode-desc">
         <div>Count down</div>
     </div>
+</div>
+
+<div>
+<canvas id="chart" width="400" height="200"></canvas>
 </div>
 
 {% endblock %}
