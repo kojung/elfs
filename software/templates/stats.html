@@ -19,11 +19,9 @@ $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 DB = {{ db|tojson|safe }}
 
 // update chart
-function updateChart() {
+function updateChart(variant, distance) {
     var name        = $("#user option:selected").attr("value");
     var chosenMode  = $("ul#elfs-nav-tabs li.active").attr("id");
-    var variant     = "";
-    var distance    = "5";
     var rawData     = DB[name][chosenMode][variant][distance];
     var scores      = [];
     var scorePerMin = [];
@@ -82,7 +80,20 @@ function updateChart() {
 }
 
 function addButton(mode, variant, distance) {
-    return "mode = " + mode + ", variant = " + variant + ", distance = " + distance;
+    if (mode == "practice") {
+        // practice mode does not have variants
+        var label = "At " + distance + " feet";
+    } else if (mode == "timed") {
+        // timed's variant is time
+        var label = variant + " seconds at " + distance + " feet";
+    } else if (mode == "countdown" ) {
+        // countdown variant is countdown time
+        var label = variant + " msec at " + distance + " feet";
+    }
+
+    var button = '<a href="#" class="btn btn-primary" role="button" onClick="updateChart(variant, distance)">' + label + '</a>';
+
+    return button;
 }
 
 function updateVariantAndDistance() {
@@ -99,7 +110,11 @@ function updateVariantAndDistance() {
         }
     }
 
-    updateChart();
+    if (variantAndDistance.length == 0) {
+        variantAndDistanceDiv.append("No data found");
+    } else {
+        updateChart(variantAndDistance[0][0], variantAndDistance[0][1]);
+    }
 }
 
 // initial function
@@ -139,7 +154,7 @@ $(document).ready(init);
     </li>
 </ul>
 
-<div id="variantsAndDistance">
+<div class="text-center elfs-setting" id="variantsAndDistance">
 EMPTY
 </div>
 
