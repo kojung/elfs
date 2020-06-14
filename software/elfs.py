@@ -105,7 +105,7 @@ def index():
 
 @app.route('/stop', methods=['GET'])
 def stop():
-    user         = request.args.get('user')
+    user         = request.args.get('user').lower()
     mode         = request.args.get('mode')
     variant      = request.args.get('variant')
     distance     = request.args.get('distance')

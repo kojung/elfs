@@ -20,10 +20,66 @@ DB = {{ db|tojson|safe }}
 
 // update chart
 function updateChart() {
-    var name = $("#user option:selected").attr("value");
-    var chosenMode = $("ul#elfs-nav-tabs li.active").attr("id")
-    console.log("updating to user " + name);
-    console.log("updating to mode " + chosenMode);
+    var name        = $("#user option:selected").attr("value");
+    var chosenMode  = $("ul#elfs-nav-tabs li.active").attr("id");
+    var variant     = "";
+    var distance    = "5";
+    var rawData     = DB[name][chosenMode][variant][distance];
+    var scores      = [];
+    var scorePerMin = [];
+    var labels      = [];
+    var labelCnt    = 0;
+    for (timeAndScore of rawData) {
+        console.log(timeAndScore);
+        var time = timeAndScore[0];
+        var score = timeAndScore[1];
+        scores.push(score);
+        scorePerMin.push((score / time * 100 * 60).toFixed(2));
+        labels.push(labelCnt++);
+    }
+
+    Chart.defaults.global.defaultFontSize = 24;
+    var datasets = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Scores',
+                yAxisID: 'Scores',
+                data: scores,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            }, {
+                label: 'Scores per min',
+                yAxisID: 'ScoresPerMin',
+                data: scorePerMin,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Scores'
+                    },
+                    id: 'Scores',
+                    type: 'linear',
+                    position: 'left',
+                }, {
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'ScoresPerMin'
+                    },
+                    id: 'ScoresPerMin',
+                    type: 'linear',
+                    position: 'right',
+                }]
+            }
+        }
+    };
+
+    var ctx   = $("#chart");
+    var chart = new Chart(ctx, datasets);
 }
 
 // initial function
