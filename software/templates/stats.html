@@ -30,7 +30,6 @@ function updateChart() {
     var labels      = [];
     var labelCnt    = 0;
     for (timeAndScore of rawData) {
-        console.log(timeAndScore);
         var time = timeAndScore[0];
         var score = timeAndScore[1];
         scores.push(score);
@@ -82,14 +81,35 @@ function updateChart() {
     var chart = new Chart(ctx, datasets);
 }
 
+function addButton(mode, variant, distance) {
+    return "mode = " + mode + ", variant = " + variant + ", distance = " + distance;
+}
+
+function updateVariantAndDistance() {
+    var name        = $("#user option:selected").attr("value");
+    var chosenMode  = $("ul#elfs-nav-tabs li.active").attr("id");
+    var rawData     = DB[name][chosenMode];
+    var variantAndDistanceDiv = $("#variantsAndDistance")
+    variantAndDistanceDiv.empty();
+    var variantAndDistance = [];
+    for (variant in rawData) {
+        for (distance in rawData[variant]) {
+            variantAndDistance.push([variant, distance]);
+            $("#variantsAndDistance").append(addButton(chosenMode, variant, distance));
+        }
+    }
+
+    updateChart();
+}
+
 // initial function
 function init() {
     for (name in DB) {
         $("#user").append("<option value=\"" + name + "\">" + name + "</option>");
     }
-    $("#user").change(updateChart);
-    $('a[data-toggle="tab"]').on('shown.bs.tab', updateChart);
-    updateChart();
+    $("#user").change(updateVariantAndDistance);
+    $('a[data-toggle="tab"]').on('shown.bs.tab', updateVariantAndDistance);
+    updateVariantAndDistance();
 }
 
 // autoload these functions
@@ -119,18 +139,8 @@ $(document).ready(init);
     </li>
 </ul>
 
-<div class="tab-content">
-    <div id="practice" class="tab-pane fade in active elfs-mode-desc">
-        <div>Practice mode</div>
-    </div>
-      
-    <div id="timed" class="tab-pane fade in elfs-mode-desc">
-        <div>Timed mode</div>
-    </div>
-
-    <div id="countdown" class="tab-pane fade in elfs-mode-desc">
-        <div>Count down</div>
-    </div>
+<div id="variantsAndDistance">
+EMPTY
 </div>
 
 <div>
