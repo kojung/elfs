@@ -142,6 +142,15 @@ def stats():
     db = DB()
     return render_template('stats.html', db=db.db)
 
+def refresh_thread(state):
+    """Refresh state once a second, in case SSE communication fails"""
+    while True:
+        state['queue'].put("REFRESH")
+        time.sleep(1)
+
+refresh_tid = threading.Thread(target=refresh_thread, args=[state])
+refresh_tid.start()
+    
 def test_thread(state):
     queue = state['queue']
     time.sleep(5)
