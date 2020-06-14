@@ -40,6 +40,11 @@
     font-size: 200%;
 }
 
+.elfs-setting {
+    font-size: 200%;
+    margin: 10px;
+}
+
 body {
     padding-left: 20px;
     padding-right: 20px;

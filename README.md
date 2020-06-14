@@ -6,9 +6,21 @@ Extensible Laser Firing System (ELFS) is an open source project intended to make
 
 [![](http://img.youtube.com/vi/4uz0w_4gueM/0.jpg)](http://www.youtube.com/watch?v=4uz0w_4gueM "ELFS Demo")
 
-## System Overview
+## Snapshots
 
-(TODO)
+### Practice mode
+
+![Practice mode](docs/png/practice.png)
+
+#### Count down mode
+
+![](docs/png/countdown.png)
+
+
+
+#### Statistics
+
+![](docs/png/stats.png)
 
 ## Components
 

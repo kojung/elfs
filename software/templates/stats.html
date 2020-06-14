@@ -1,0 +1,166 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}
+Extensible Laser Firing System
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='elfs.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script language="JavaScript">
+
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+
+// database
+DB = {{ db|tojson|safe }}
+
+// update chart
+function updateChart(variant, distance) {
+    var name        = $("#user option:selected").attr("value");
+    var chosenMode  = $("ul#elfs-nav-tabs li.active").attr("id");
+    var rawData     = DB[name][chosenMode][variant][distance];
+    var scores      = [];
+    var scorePerMin = [];
+    var labels      = [];
+    var labelCnt    = 0;
+    for (timeAndScore of rawData) {
+        var time = timeAndScore[0];
+        var score = timeAndScore[1];
+        scores.push(score);
+        scorePerMin.push((score / time * 100 * 60).toFixed(2));
+        labels.push(labelCnt++);
+    }
+
+    Chart.defaults.global.defaultFontSize = 24;
+    var datasets = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Scores',
+                yAxisID: 'Scores',
+                data: scores,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            }, {
+                label: 'Scores per min',
+                yAxisID: 'ScoresPerMin',
+                data: scorePerMin,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Scores'
+                    },
+                    id: 'Scores',
+                    type: 'linear',
+                    position: 'left',
+                }, {
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'ScoresPerMin'
+                    },
+                    id: 'ScoresPerMin',
+                    type: 'linear',
+                    position: 'right',
+                }]
+            }
+        }
+    };
+
+    var ctx   = $("#chart");
+    var chart = new Chart(ctx, datasets);
+}
+
+function addButton(mode, variant, distance) {
+    if (mode == "practice") {
+        // practice mode does not have variants
+        var label = "At " + distance + " feet";
+    } else if (mode == "timed") {
+        // timed's variant is time
+        var label = variant + " seconds at " + distance + " feet";
+    } else if (mode == "countdown" ) {
+        // countdown variant is countdown time
+        var label = variant + " msec at " + distance + " feet";
+    }
+
+    var button = '<a href="#" class="btn btn-primary" role="button" onClick="updateChart(variant, distance)">' + label + '</a>';
+
+    return button;
+}
+
+function updateVariantAndDistance() {
+    var name        = $("#user option:selected").attr("value");
+    var chosenMode  = $("ul#elfs-nav-tabs li.active").attr("id");
+    var rawData     = DB[name][chosenMode];
+    var variantAndDistanceDiv = $("#variantsAndDistance")
+    variantAndDistanceDiv.empty();
+    var variantAndDistance = [];
+    for (variant in rawData) {
+        for (distance in rawData[variant]) {
+            variantAndDistance.push([variant, distance]);
+            $("#variantsAndDistance").append(addButton(chosenMode, variant, distance));
+        }
+    }
+
+    if (variantAndDistance.length == 0) {
+        variantAndDistanceDiv.append("No data found");
+    } else {
+        updateChart(variantAndDistance[0][0], variantAndDistance[0][1]);
+    }
+}
+
+// initial function
+function init() {
+    for (name in DB) {
+        $("#user").append("<option value=\"" + name + "\">" + name + "</option>");
+    }
+    $("#user").change(updateVariantAndDistance);
+    $('a[data-toggle="tab"]').on('shown.bs.tab', updateVariantAndDistance);
+    updateVariantAndDistance();
+}
+
+// autoload these functions
+$(document).ready(init);
+</script>
+
+<script src="static/Chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center"><img src="static/logo.png" alt="logo" width="8%" height="auto"> Extensible Laser Firing System</h1>
+<div class="elfs-setting">
+    <label for="user">User</label>
+    <select id="user">
+    </select>
+</div>
+<ul class="nav nav-tabs" id="elfs-nav-tabs">
+    <li role="presentation" class="active text-center elfs-mode" id="practice">
+        <a href="#practice" data-toggle="tab">Practice</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="timed">
+        <a href="#timed" data-toggle="tab">Timed</a>
+    </li>
+    <li role="presentation" class="text-center elfs-mode" id="countdown">
+        <a href="#countdown" data-toggle="tab">Countdown</a>
+    </li>
+</ul>
+
+<div class="text-center elfs-setting" id="variantsAndDistance">
+EMPTY
+</div>
+
+<div>
+<canvas id="chart" width="400" height="200"></canvas>
+</div>
+
+{% endblock %}
+

@@ -8,9 +8,11 @@ import threading
 import atexit
 import random
 import os.path
+import json
 
 from training_modes import PracticeMode, TimedMode, CountdownMode
 from controller import Controller
+from db import DB
 
 # instantiate the app
 app = Flask("ELFS")
@@ -71,6 +73,7 @@ def shutdown():
 def process_queue(state):
     """pop data from queue and perform necessary state updates"""
     cmd = state['queue'].get()
+    # print(f"process_queue(): got cmd = {cmd}")
     training[state['mode']].process(cmd)
 
 @app.route('/sse')
@@ -103,10 +106,17 @@ def index():
 
 @app.route('/stop', methods=['GET'])
 def stop():
-    elased_time = request.args.get('elapsedTime')
+    user         = request.args.get('user').lower()
+    mode         = request.args.get('mode')
+    variant      = request.args.get('variant')
+    distance     = request.args.get('distance')
+    total_score  = request.args.get('totalScore')
+    elapsed_time = request.args.get('elapsedTime')
+    db           = DB()
+    db.add(user, mode, variant, distance, elapsed_time, total_score)
     training[state['mode']].stop()
     state['queue'].put("REFRESH")
-    return jsonify(result=f"mode={state['mode']}, elased_time={elased_time}")
+    return jsonify(result="OK")
 
 @app.route('/start', methods=['GET'])
 def start():
@@ -126,8 +136,22 @@ def start():
 
     # push a refresh token into the queue so GUI state gets refreshed
     state['queue'].put("REFRESH")
-    return jsonify(result=f"mode={state['mode']}")
+    return jsonify(result="OK")
 
+@app.route('/stats')
+def stats():
+    db = DB()
+    return render_template('stats.html', db=db.db)
+
+def refresh_thread(state):
+    """Refresh state once a second, in case SSE communication fails"""
+    while True:
+        state['queue'].put("REFRESH")
+        time.sleep(1)
+
+refresh_tid = threading.Thread(target=refresh_thread, args=[state])
+refresh_tid.start()
+    
 def test_thread(state):
     queue = state['queue']
     time.sleep(5)
