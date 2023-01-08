@@ -21,6 +21,8 @@
 
 #define NUM_TARGETS (4)
 
+#define TRIM A5
+
 // Targets pins: LED, LDR, TRIGGER
 // TRIGGER is shared because of single actuator
 Target<8,  A0, 2> t0;
@@ -31,13 +33,34 @@ Target<11, A3, 2> t3;
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
+static int sensor_threshold = 500;
+static int loop_counter = 0;
+
 void setup() {
-    // nothing to do
+    // Serial
+    Serial.begin(9600);
+    Serial.println("Hello");
+    // set up trim input
+    pinMode(TRIM, INPUT);  // analog
+
+    // update target
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->run_self_test();
+    }
 }
 
 void loop() {
-    for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->update();
-        targets[i]->set_mode(TARGET_ENABLED);
+    // read sensor threshold once every N loops
+    if (loop_counter % 300 == 0) {
+        sensor_threshold = analogRead(TRIM);
+        Serial.println(sensor_threshold);
     }
+    loop_counter++;
+
+    // // update target
+    // for (uint8_t i=0; i < NUM_TARGETS; i++) {
+    //     targets[i]->update();
+    //     targets[i]->set_mode(TARGET_ENABLED);
+    //     targets[i]->set_sensor_threshold(sensor_threshold);
+    // }
 }
