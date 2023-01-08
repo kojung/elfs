@@ -20,7 +20,6 @@
 #include "TargetBase.h"
 
 #define NUM_TARGETS (4)
-
 #define TRIM A5
 
 // Targets pins: LED, LDR, TRIGGER
@@ -49,24 +48,29 @@ void setup() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->run_self_test();
     }
-
-    // toggle actuator
     t0.toggle_actuator();
+
+}
+
+static void update_thresholds() {
+    sensor_threshold = analogRead(TRIM);
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->set_sensor_threshold(sensor_threshold);
+    }
 }
 
 void loop() {
     // read sensor threshold once every N loops
     if (loop_counter % 300 == 0) {
-        sensor_threshold = analogRead(TRIM);
-        for (uint8_t i=0; i < NUM_TARGETS; i++) {
-            targets[i]->set_sensor_threshold(sensor_threshold);
-        }
+        update_thresholds();
     }
 
     loop_counter++;
 
     // update target
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->update();
+        if (targets[i]->update() > 0) {
+            update_thresholds();
+        }
     }
 }

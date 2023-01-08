@@ -107,9 +107,15 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
         delay(30);
-        disable_actuator();  // early actuator disable
+        // early actuator disable
+        if (i == 5) {
+            disable_actuator();
+        }
     }
     set_color(TARGET_NUM_LEDS, CRGB::Black);
+
+    // rest a bit
+    delay(500);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
