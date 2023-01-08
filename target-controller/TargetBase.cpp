@@ -26,25 +26,6 @@ TargetBase::~TargetBase() {
     // nothing to destroy
 }
 
-void TargetBase::set_mode(target_mode_t mode) {
-    mode_ = mode;
-    hit_state_ = false;
-    if (mode_ == TARGET_ENABLED) {
-        set_color(TARGET_NUM_LEDS, CRGB::Black);
-    } else if (mode_ == TARGET_TIMED) {
-        led_counter_ = TARGET_NUM_LEDS;
-        set_color(led_counter_, CRGB::Green);
-        last_update_time_ = millis();
-    } else if (mode_ == TARGET_DISABLED) {
-        set_color(TARGET_NUM_LEDS, CRGB::Black);
-    }
-    disable_actuator();
-}
-
-bool TargetBase::get_hit_state() {
-    return hit_state_;
-}
-
 void TargetBase::set_color(uint8_t count, CRGB color) {
     for (uint8_t i=0; i<count; i++) {
         ring_[i] = color;
@@ -61,14 +42,6 @@ void TargetBase::set_sensor_threshold(int sensor_threshold) {
 
 int TargetBase::get_sensor_threshold() {
     return sensor_threshold_;
-}
-
-void TargetBase::set_timer_interval(unsigned long timer_interval) {
-    timer_interval_ = timer_interval;
-}
-
-unsigned long TargetBase::get_timer_interval() {
-    return timer_interval_;
 }
 
 void TargetBase::set_ring_brightness(int ring_brightness) {

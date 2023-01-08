@@ -21,14 +21,12 @@
 #include <Arduino.h>
 #include "FastLED.h"
 
-#define TARGET_NUM_LEDS                   (16)
+#define TARGET_NUM_LEDS  (16)
 
-typedef enum target_mode_e {
-    TARGET_ENABLED = 0,        // target enabled
-    TARGET_TIMED,              // target enabled for a limited time
-    TARGET_DISABLED            // target disabled
-} target_mode_t;
-
+/** Virtual class for Target
+* Why virtual class? Because Target class is templatized and the main
+* application wants to iterate through targets in an array
+*/
 class TargetBase {
  public:
     /** Constructor */
@@ -52,23 +50,9 @@ class TargetBase {
     /** disable actuator */
     virtual void disable_actuator();
 
-    /** Set target mode
-    * @param mode Target mode
-    */
-    void set_mode(target_mode_t mode);
-
-    /** Return target state
-    * @return True if target has been hit, False otherwise
-    */
-    bool get_hit_state();
-
     /** Accessors for sensor threshold */
     void set_sensor_threshold(int sensor_threshold);
     int get_sensor_threshold();
-
-    /** Accessors for timer interval */
-    void set_timer_interval(unsigned long timer_interval);
-    unsigned long get_timer_interval();
 
     /** Accessors for ring brightness */
     void set_ring_brightness(int brightness);
@@ -81,12 +65,6 @@ class TargetBase {
     // FastLED controller
     CLEDController* controller_;
 
-    // Current target mode
-    target_mode_t mode_;
-
-    // Flag indicating if target has been hit or not
-    bool hit_state_;
-
     // Adjust sensor sensitivity
     int sensor_threshold_;
 
@@ -95,9 +73,4 @@ class TargetBase {
 
     // Array holding ring colors
     CRGB ring_[TARGET_NUM_LEDS];
-
-    // Counters used in TIMED mode
-    uint8_t led_counter_;              // count LEDs
-    unsigned long last_update_time_;   // keep track of last time
-    unsigned long timer_interval_;     // how often to update the LED counter
 };

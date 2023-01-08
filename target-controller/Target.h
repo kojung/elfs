@@ -24,9 +24,12 @@
 typedef uint8_t pin_t;
 
 #define TARGET_DEFAULT_SENSOR_THRESHOLD  (500)
-#define TARGET_DEFAULT_TIMER_INTERVAL   (1000)
 #define TARGET_DEFAULT_RING_BRIGHTNESS    (20)
 
+/** Template class for a Target
+* Why template? Because FastLED library designates pins using
+* templates
+*/
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 class Target : public TargetBase {
  public:
@@ -41,7 +44,6 @@ class Target : public TargetBase {
     * inside the Arduino main loop as fast as possible.
     * @return value > 0 if target is hit. value represents the LDR value
     * @return value == 0 if target is not hit
-    * @return value < 0 if value is not hit but count down timer expired
     */
     int update() override;
 
@@ -64,7 +66,6 @@ Target<LED, LDR, TRIGGER>::Target() {
     // default values
     sensor_threshold_ = TARGET_DEFAULT_SENSOR_THRESHOLD;
     ring_brightness_  = TARGET_DEFAULT_RING_BRIGHTNESS;
-    timer_interval_   = TARGET_DEFAULT_TIMER_INTERVAL;
 
     // configure pins
     pinMode(LED,     OUTPUT);
@@ -74,6 +75,9 @@ Target<LED, LDR, TRIGGER>::Target() {
 
     // create ring of led
     controller_ = &FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
+
+    // turn off all LEDs
+    set_color(TARGET_NUM_LEDS, CRGB::Black);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
@@ -83,32 +87,13 @@ Target<LED, LDR, TRIGGER>::~Target() {
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 int Target<LED, LDR, TRIGGER>::update() {
-    // update only if target is enabled AND hasn't been hit yet
-    if (mode_ != TARGET_DISABLED && !hit_state_) {
-        int ldr = analogRead(LDR);
-        if (ldr < sensor_threshold_) {
-            hit_state_ = true;
-            hit_feedback();
-            return ldr;
-        } else {
-            // update timer?
-            if (mode_ == TARGET_TIMED && led_counter_ > 0) {
-                unsigned long now = millis();
-                if (now - last_update_time_ > timer_interval_) {
-                    led_counter_--;
-                    set_color(led_counter_, CRGB::Green);
-                    last_update_time_ = now;
-                }
-
-                // if timer expired, disable the target
-                if (led_counter_ == 0) {
-                    set_mode(TARGET_DISABLED);
-                    return -1;
-                }
-            }
-        }
+    // check if target is hit
+    int ldr = analogRead(LDR);
+    if (ldr < sensor_threshold_) {
+        hit_feedback();
+        return ldr;
     }
-    // no state changes
+    // not hit
     return 0;
 }
 
@@ -122,9 +107,9 @@ void Target<LED, LDR, TRIGGER>::hit_feedback() {
         delay(30);
         set_color(TARGET_NUM_LEDS, CRGB::Black);
         delay(30);
-        disable_actuator();
+        disable_actuator();  // early actuator disable
     }
-    set_color(TARGET_NUM_LEDS, CRGB::Red);
+    set_color(TARGET_NUM_LEDS, CRGB::Black);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
@@ -151,4 +136,3 @@ template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::disable_actuator() {
     digitalWrite(TRIGGER, LOW);
 }
-
