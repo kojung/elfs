@@ -1,1 +1,0 @@
-../firmware/main-controller/controller.py

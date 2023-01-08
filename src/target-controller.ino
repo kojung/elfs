@@ -18,16 +18,15 @@
 
 #include "Target.h"
 #include "TargetBase.h"
-#include "cmd.h"
-#include "rsp.h"
 
 #define NUM_TARGETS (4)
 
 // Targets pins: LED, LDR, TRIGGER
+// TRIGGER is shared because of single actuator
 Target<8,  A0, 2> t0;
-Target<9,  A1, 3> t1;
-Target<10, A2, 4> t2;
-Target<11, A3, 5> t3;
+Target<9,  A1, 2> t1;
+Target<10, A2, 2> t2;
+Target<11, A3, 2> t3;
 
 // collect targets into an array
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
