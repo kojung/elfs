@@ -39,14 +39,19 @@ static int loop_counter = 0;
 
 void setup() {
     // Serial (uncomment if needed for debug)
-    // Serial.begin(9600);
-    // Serial.println("Hello");
+    Serial.begin(9600);
+    Serial.println("ELFS single actuator");
 
     // set up trim input
     pinMode(TRIM, INPUT);  // analog
+
+    // run self-test
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->disable_actuator();
+        targets[i]->run_self_test();
     }
+
+    // toggle actuator
+    t0.toggle_actuator();
 }
 
 void loop() {

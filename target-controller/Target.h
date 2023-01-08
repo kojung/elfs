@@ -56,6 +56,9 @@ class Target : public TargetBase {
     /** disable actuator */
     void disable_actuator() override;
 
+    /** toggle actuator */
+    void toggle_actuator() override;
+
  private:
     // provide feedback for hit
     void hit_feedback();
@@ -75,9 +78,6 @@ Target<LED, LDR, TRIGGER>::Target() {
 
     // create ring of led
     controller_ = &FastLED.addLeds<NEOPIXEL, LED>(ring_, TARGET_NUM_LEDS);
-
-    // turn off all LEDs
-    set_color(TARGET_NUM_LEDS, CRGB::Black);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
@@ -121,18 +121,22 @@ void Target<LED, LDR, TRIGGER>::run_self_test() {
     }
     set_color(TARGET_NUM_LEDS, CRGB::Black);
 
-    // exercise trigger
-    enable_actuator();
-    delay(1000);
-    disable_actuator();
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::enable_actuator() {
-    digitalWrite(TRIGGER, HIGH);
+    digitalWrite(TRIGGER, LOW);   // active low relay
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::disable_actuator() {
-    digitalWrite(TRIGGER, LOW);
+    digitalWrite(TRIGGER, HIGH);  // active low relay
+}
+
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::toggle_actuator() {
+    enable_actuator();
+    delay(1000);
+    disable_actuator();
 }
