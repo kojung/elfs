@@ -59,6 +59,12 @@ class Target : public TargetBase {
     /** toggle actuator */
     void toggle_actuator() override;
 
+    /** enable target */
+    void enable() override;
+
+    /** disable target */
+    void disable() override;
+
  private:
     // provide feedback for hit
     void hit_feedback();
@@ -145,4 +151,14 @@ void Target<LED, LDR, TRIGGER>::toggle_actuator() {
     enable_actuator();
     delay(750);
     disable_actuator();
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::enable() {
+    set_color(TARGET_NUM_LEDS, CRGB::Green);
+}
+
+template<pin_t LED, pin_t LDR, pin_t TRIGGER>
+void Target<LED, LDR, TRIGGER>::disable() {
+    set_color(TARGET_NUM_LEDS, CRGB::Black);
 }

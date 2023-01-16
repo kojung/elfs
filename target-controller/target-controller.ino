@@ -19,12 +19,16 @@
 #include "Target.h"
 #include "TargetBase.h"
 
-#define NUM_TARGETS (4)
-#define TRIM A5
 
-#define BUZZER           (3)
-#define BUZZER_DELAY_US  (120)   // aim for 4kHz tone
-#define BUZZER_CYCLES    (800)  // aim for 0.5 sec beep
+#define NUM_TARGETS (4)  ///< total number of targets
+#define TRIM A5          ///< analog pin for threshold
+
+#define BUZZER           (3)    ///< pin for buzzer
+#define BUZZER_DELAY_US  (120)  ///< aim for 4kHz tone
+#define BUZZER_CYCLES    (800)  ///< aim for 0.5 sec beep
+
+#define TARGET_DELAY_MIN_MSEC (1500)  ///< minimum interval between targets
+#define TARGET_DELAY_MAX_MSEC (5000)  ///< maximum interval between targets
 
 // Targets pins: LED, LDR, TRIGGER
 // TRIGGER is shared because of single actuator
@@ -50,10 +54,40 @@ static void beep() {
     }
 }
 
+// enable a random target
+static void enable_random_target() {
+    int random_target = random(NUM_TARGETS);
+    for (int i=0; i < NUM_TARGETS; i++) {
+        if (i == random_target) {
+            targets[i]->enable();
+        } else {
+            targets[i]->disable();
+        }
+    }
+    beep();
+}
+
+// update target threshold
+static void update_thresholds() {
+    sensor_threshold = analogRead(TRIM);
+    for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        targets[i]->set_sensor_threshold(sensor_threshold);
+    }
+}
+
+// wait random delay
+static void random_delay() {
+    int random_sec = random(TARGET_DELAY_MIN_MSEC, TARGET_DELAY_MAX_MSEC);
+    delay(random_sec);
+}
+
 void setup() {
     // Serial (uncomment if needed for debug)
     Serial.begin(9600);
     Serial.println("ELFS single actuator");
+
+    // Randomize
+    randomSeed(analogRead(0));
 
     // set up trim input
     pinMode(TRIM, INPUT);  // analog
@@ -67,13 +101,7 @@ void setup() {
     }
     t0.toggle_actuator();
 
-}
-
-static void update_thresholds() {
-    sensor_threshold = analogRead(TRIM);
-    for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        targets[i]->set_sensor_threshold(sensor_threshold);
-    }
+    enable_random_target();
 }
 
 void loop() {
@@ -86,8 +114,11 @@ void loop() {
 
     // update target
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
+        // ith target is hit
         if (targets[i]->update() > 0) {
             update_thresholds();
+            random_delay();
+            enable_random_target();
         }
     }
 }

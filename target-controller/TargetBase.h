@@ -53,6 +53,12 @@ class TargetBase {
     /** toggle actuator */
     virtual void toggle_actuator() ;
 
+    /** enable target */
+    virtual void enable();
+
+    /** enable target */
+    virtual void disable();
+
     /** Accessors for sensor threshold */
     void set_sensor_threshold(int sensor_threshold);
     int get_sensor_threshold();
