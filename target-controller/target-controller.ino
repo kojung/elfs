@@ -43,6 +43,7 @@ TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 static int sensor_threshold = 500;
 static int loop_counter = 0;
+static int enabled_target = 0;
 
 // make a beep sound at pin BUZZER
 static void beep() {
@@ -101,7 +102,7 @@ void setup() {
     }
     t0.toggle_actuator();
 
-    enable_random_target();
+    enabled_target = enable_random_target();
 }
 
 void loop() {
@@ -112,13 +113,10 @@ void loop() {
 
     loop_counter++;
 
-    // update target
-    for (uint8_t i=0; i < NUM_TARGETS; i++) {
-        // ith target is hit
-        if (targets[i]->update() > 0) {
-            update_thresholds();
-            random_delay();
-            enable_random_target();
-        }
+    // monitor enabled target
+    if (targets[enabled_target]->update() > 0) {
+        update_thresholds();
+        random_delay();
+        enabled_target = enable_random_target();
     }
 }
