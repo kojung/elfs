@@ -27,7 +27,7 @@
 #define BUZZER_DELAY_US  (120)  ///< aim for 4kHz tone
 #define BUZZER_CYCLES    (800)  ///< aim for 0.5 sec beep
 
-#define TARGET_DELAY_MIN_MSEC (1500)  ///< minimum interval between targets
+#define TARGET_DELAY_MIN_MSEC (500)  ///< minimum interval between targets
 #define TARGET_DELAY_MAX_MSEC (5000)  ///< maximum interval between targets
 
 // Targets pins: LED, LDR, TRIGGER
@@ -56,7 +56,7 @@ static void beep() {
 }
 
 // enable a random target
-static void enable_random_target() {
+static int enable_random_target() {
     int random_target = random(NUM_TARGETS);
     for (int i=0; i < NUM_TARGETS; i++) {
         if (i == random_target) {
@@ -66,6 +66,7 @@ static void enable_random_target() {
         }
     }
     beep();
+    return random_target;
 }
 
 // update target threshold
