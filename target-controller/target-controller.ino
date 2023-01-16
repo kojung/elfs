@@ -22,6 +22,10 @@
 #define NUM_TARGETS (4)
 #define TRIM A5
 
+#define BUZZER           (3)
+#define BUZZER_DELAY_US  (120)   // aim for 4kHz tone
+#define BUZZER_CYCLES    (800)  // aim for 0.5 sec beep
+
 // Targets pins: LED, LDR, TRIGGER
 // TRIGGER is shared because of single actuator
 Target<8,  A0, 2> t0;
@@ -36,6 +40,16 @@ TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 static int sensor_threshold = 500;
 static int loop_counter = 0;
 
+// make a beep sound at pin BUZZER
+static void beep() {
+    for (int i=0; i < BUZZER_CYCLES; i++) {
+        digitalWrite(BUZZER, HIGH);
+        delayMicroseconds(BUZZER_DELAY_US);
+        digitalWrite(BUZZER, LOW);
+        delayMicroseconds(BUZZER_DELAY_US);
+    }
+}
+
 void setup() {
     // Serial (uncomment if needed for debug)
     Serial.begin(9600);
@@ -43,6 +57,9 @@ void setup() {
 
     // set up trim input
     pinMode(TRIM, INPUT);  // analog
+
+    // set up buzzer output
+    pinMode(BUZZER, OUTPUT);
 
     // run self-test
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
