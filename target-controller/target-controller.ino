@@ -23,6 +23,8 @@
 #define NUM_TARGETS (4)  ///< total number of targets
 #define TRIM A5          ///< analog pin for threshold
 
+#define BRIGHTNESS A4     ///< led brightness
+
 #define BUZZER           (3)    ///< pin for buzzer
 #define BUZZER_DELAY_US  (120)  ///< aim for 4kHz tone
 #define BUZZER_CYCLES    (800)  ///< aim for 0.5 sec beep
@@ -42,6 +44,7 @@ Target<11, A3, 2> t3;
 TargetBase* targets[NUM_TARGETS] = {&t0, &t1, &t2, &t3};
 
 static int sensor_threshold = 500;
+static uint8_t brightness = 500;
 static int loop_counter = 0;
 static int enabled_target = 0;
 
@@ -72,8 +75,10 @@ static int enable_random_target() {
 // update target threshold
 static void update_thresholds() {
     sensor_threshold = analogRead(TRIM);
+    brightness = analogRead(BRIGHTNESS) / 4;  // 0..1023 -> 0..255
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_sensor_threshold(sensor_threshold);
+        targets[i]->set_ring_brightness(brightness);
     }
 }
 
@@ -93,6 +98,9 @@ void setup() {
 
     // set up trim input
     pinMode(TRIM, INPUT);  // analog
+
+    // set up intensity input
+    pinMode(BRIGHTNESS, INPUT);  // analog
 
     // set up buzzer output
     pinMode(BUZZER, OUTPUT);
