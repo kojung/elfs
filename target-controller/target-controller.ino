@@ -75,7 +75,9 @@ static int enable_random_target() {
 // update target threshold
 static void update_thresholds() {
     sensor_threshold = analogRead(TRIM);
-    brightness = analogRead(BRIGHTNESS) / 4;  // 0..1023 -> 0..255
+    int brightness_raw = analogRead(BRIGHTNESS);
+    int brightness_scaled = (1023 - brightness_raw) / 4;  // 0..1023 -> 255..0
+    brightness = max(brightness_scaled, 1);  // clip
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->set_sensor_threshold(sensor_threshold);
         targets[i]->set_ring_brightness(brightness);
@@ -118,6 +120,8 @@ void loop() {
     // read sensor threshold once every N loops
     if (loop_counter % 300 == 0) {
         update_thresholds();
+        // refresh the brightness of enabled target
+        targets[enabled_target]->enable();
     }
 
     loop_counter++;

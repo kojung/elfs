@@ -155,7 +155,7 @@ void Target<LED, LDR, TRIGGER>::toggle_actuator() {
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
 void Target<LED, LDR, TRIGGER>::enable() {
-    set_color(TARGET_NUM_LEDS, CRGB::Green);
+    set_color(TARGET_NUM_LEDS, CRGB::Blue);
 }
 
 template<pin_t LED, pin_t LDR, pin_t TRIGGER>
