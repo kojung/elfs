@@ -29,7 +29,7 @@
 #define BUZZER_DELAY_US  (120)  ///< aim for 4kHz tone
 #define BUZZER_CYCLES    (800)  ///< aim for 0.5 sec beep
 
-#define TARGET_DELAY_MIN_MSEC (500)  ///< minimum interval between targets
+#define TARGET_DELAY_MIN_MSEC (1000)  ///< minimum interval between targets
 #define TARGET_DELAY_MAX_MSEC (5000)  ///< maximum interval between targets
 
 #define STATUS_LOAD_PIN  (4)
@@ -75,6 +75,7 @@ static int enable_random_target() {
         }
     }
     beep();
+    status.start();
     return random_target;
 }
 
@@ -131,10 +132,16 @@ void loop() {
         targets[enabled_target]->enable();
     }
 
+    // update status once every N loops
+    if (loop_counter % 50 == 0) {
+        status.update();
+    }
+
     loop_counter++;
 
     // monitor enabled target
     if (targets[enabled_target]->update() > 0) {
+        status.stop();
         update_thresholds();
         random_delay();
         enabled_target = enable_random_target();

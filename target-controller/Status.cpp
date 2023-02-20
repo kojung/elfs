@@ -81,22 +81,23 @@ void Status::increment_count() {
 
 void Status::update_count_() {
     digits_t digits = convert(count_);
-    max7219_.write_char(0, digits.a);
-    max7219_.write_char(1, digits.b);
-    max7219_.write_char(2, digits.c);
-    max7219_.write_char(3, digits.d);
+    // drop digits `a` and `b` for `count`
+    max7219_.write_char(0, digits.c);
+    max7219_.write_char(1, digits.d);
 }
 
 void Status::update_best_time_() {
-    digits_t digits = convert(best_time_ * 100);
-    max7219_.write_char(4, digits.a);
-    max7219_.write_char(5, digits.b);
-    max7219_.write_char(6, digits.c, true);
-    max7219_.write_char(7, digits.d);
+    digits_t digits = convert(best_time_ / 100);
+    // use digit 2 as separator
+    max7219_.write_char(3, digits.a);
+    max7219_.write_char(4, digits.b);
+    max7219_.write_char(5, digits.c, true);
+    max7219_.write_char(6, digits.d);
 }
 
 void Status::update_current_time_() {
-    digits_t digits = convert(current_time_ * 100);
+    digits_t digits = convert(current_time_ / 100);
+    // use digit 7 as separator
     max7219_.write_char(8, digits.a);
     max7219_.write_char(9, digits.b);
     max7219_.write_char(10, digits.c, true);
