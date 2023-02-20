@@ -43,6 +43,9 @@ class Max7219Chain {
     /** clear all digits in the chain */
     void clear();
 
+    /** built-in self-test */
+    void bist();
+
  private:
     // number of digits per chip
     uint8_t digits_per_chip_;
@@ -63,4 +66,7 @@ class Max7219Chain {
     // write register at the given address for all chips in the chain
     // toggles load pin
     void write_regs_in_chain_(uint8_t addr, uint8_t data);
+
+    // flush chain with no-ops
+    void flush_();
 };

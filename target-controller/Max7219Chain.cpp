@@ -28,6 +28,9 @@
 #define MAX7219_REG_SHUTDOWN     (0xC)
 #define MAX7219_REG_DISPLAYTEST  (0xF)
 
+// register value
+#define MAX7219_VALUE_BLANK  (0xF)
+
 Max7219Chain::Max7219Chain(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint8_t intensity) :
     digits_per_chip_(digits_per_chip),
     chips_per_chain_(chips_per_chain),
@@ -73,19 +76,39 @@ void Max7219Chain::write_char(uint8_t pos, uint8_t data, bool dp) {
     // write data
     digitalWrite(load_pin_, LOW);
     uint8_t rel_pos = pos % digits_per_chip_;
-    uint8_t chip_num = pos / digits_per_chip_;
     write_reg_(rel_pos + 1, data);
 
-    // write no-op data
+    // shift data to the correct chip
+    uint8_t chip_num = pos / digits_per_chip_;
     for (uint8_t i = 0; i < chip_num; i++) {
+        write_reg_(MAX7219_REG_NOOP, 0);  // write no-op
+    }
+    digitalWrite(load_pin_, HIGH);
+    flush_();
+}
+
+void Max7219Chain::clear() {
+    for (int pos = 0; pos < digits_per_chain_; pos++) {
+        write_char(pos, MAX7219_VALUE_BLANK);
+    }
+}
+
+void Max7219Chain::flush_() {
+    digitalWrite(load_pin_, LOW);
+    for (int pos = 0; pos < chips_per_chain_; pos++) {
         write_reg_(MAX7219_REG_NOOP, 0);  // write no-op
     }
     digitalWrite(load_pin_, HIGH);
 }
 
-/** clear all digits in the chain */
-void Max7219Chain::clear() {
-    for (int pos = 0; pos < digits_per_chain_; pos++) {
-        write_char(pos, 0x0F);  // write blank
+
+void Max7219Chain::bist() {
+    clear();
+    for (int data = 0; data < 10; data++) {
+        for (int pos = 0; pos < digits_per_chain_; pos++) {
+            write_char(pos, data, true);
+        }
+        delay(150);
     }
+    clear();
 }
