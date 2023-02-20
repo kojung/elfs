@@ -28,9 +28,6 @@
 #define MAX7219_REG_SHUTDOWN     (0xC)
 #define MAX7219_REG_DISPLAYTEST  (0xF)
 
-// register value
-#define MAX7219_VALUE_BLANK  (0xF)
-
 Max7219Chain::Max7219Chain(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint8_t intensity) :
     digits_per_chip_(digits_per_chip),
     chips_per_chain_(chips_per_chain),
