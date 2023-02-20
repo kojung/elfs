@@ -18,7 +18,7 @@
 
 #include <SPI.h>
 
-#include <Max7219Chain.h>
+#include "Max7219Chain.h"
 
 // register addresses
 #define MAX7219_REG_NOOP         (0x0)
@@ -28,10 +28,12 @@
 #define MAX7219_REG_SHUTDOWN     (0xC)
 #define MAX7219_REG_DISPLAYTEST  (0xF)
 
-Max7219(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint8_t intensity) :
+Max7219Chain::Max7219Chain(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint8_t intensity) :
     digits_per_chip_(digits_per_chip),
-    chips_per_chain_(chips_per_chain)
+    chips_per_chain_(chips_per_chain),
     load_pin_(load_pin) {
+    digits_per_chain_ = digits_per_chip_ * chips_per_chain_;
+
     // configure load pin and park it in HIGH
     pinMode (load_pin_, OUTPUT);
     digitalWrite (load_pin_, HIGH);
@@ -48,12 +50,12 @@ Max7219(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint
 
 
 // write register
-void Max7219::write_reg_(uint8_t addr, uint8_t data) {
+void Max7219Chain::write_reg_(uint8_t addr, uint8_t data) {
     SPI.transfer(addr);
     SPI.transfer(data);
 }
 
-void Max7219::write_regs_in_chain_(uint8_t addr, uint8_t data) {
+void Max7219Chain::write_regs_in_chain_(uint8_t addr, uint8_t data) {
     digitalWrite(load_pin_, LOW);
     // broadcast `data` to all `addr` register in all chips
     for (uint8_t i = 0; i < chips_per_chain_; i++) {
@@ -62,7 +64,7 @@ void Max7219::write_regs_in_chain_(uint8_t addr, uint8_t data) {
     digitalWrite(load_pin_, HIGH);
 }
 
-void Max7219::write_char(uint8_t pos, uint8_t data, bool dp) {
+void Max7219Chain::write_char(uint8_t pos, uint8_t data, bool dp) {
     // conditionally add decimal point
     if (dp) {
         data |= 0x80;
@@ -82,8 +84,8 @@ void Max7219::write_char(uint8_t pos, uint8_t data, bool dp) {
 }
 
 /** clear all digits in the chain */
-void Max7219::clear() {
-    for (int i = 0; i < digits_per_chip * chips_per_chain; i++) {
+void Max7219Chain::clear() {
+    for (int pos = 0; pos < digits_per_chain_; pos++) {
         write_char(pos, 0x0F);  // write blank
     }
 }

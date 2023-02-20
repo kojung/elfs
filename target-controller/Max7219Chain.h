@@ -16,20 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 /* Control a daisy chained string of Max7219 chips
 * For simplicity, we assume the following:
 * - all chips have equal number of digits
 * - chain is driven by SPI
 * - code B decode mode used for all chips
 */
-class Max7219 {
+class Max7219Chain {
   public:
     /** constructor
     * @param digits_per_chip  Number of digits per chip
     * @param chips_per_chain  Number of MAX7219 chips per chain
     * @param load             Load pin
     */
-    Max7219(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin);
+    Max7219Chain(uint8_t digits_per_chip, uint8_t chips_per_chain, uint8_t load_pin, uint8_t intensity);
 
     /** write character at given position in the chain
     * @param pos  Character position [0 .. digits_per_chain - 1]
