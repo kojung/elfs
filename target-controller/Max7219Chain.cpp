@@ -67,7 +67,7 @@ void Max7219Chain::write_regs_in_chain_(uint8_t addr, uint8_t data) {
 void Max7219Chain::write_char(uint8_t pos, uint8_t data, bool dp) {
     // conditionally add decimal point
     if (dp) {
-        data |= 0x80;
+        data |= MAX7219_VALUE_DP;
     }
 
     // write data

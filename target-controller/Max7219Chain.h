@@ -19,7 +19,8 @@
 #pragma once
 
 // register value
-#define MAX7219_VALUE_BLANK  (0xF)
+#define MAX7219_VALUE_BLANK  (0x0F)
+#define MAX7219_VALUE_DP     (0xF0)
 
 /* Control a daisy chained string of Max7219 chips
 * For simplicity, we assume the following:
