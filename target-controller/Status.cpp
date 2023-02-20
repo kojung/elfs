@@ -49,16 +49,13 @@ static digits_t convert(int value) {
     return digits;
 }
 
-Status::Status(uint8_t load_pin, uint8_t intensity) {
+Status::Status(uint8_t load_pin, uint8_t intensity) :
     max7219_(STATUS_DIGITS_PER_CHIP, STATUS_CHIPS_PER_CHAIN, load_pin, intensity),
     count_(0),
     start_time_(-1),
     current_time_(-1),
     best_time_(-1) {
-    max7219_.bist();
-    update_count_();
-    update_best_time_();
-    update_current_time_();
+    // nothing else to do
 }
 
 void Status::start() {
@@ -67,7 +64,7 @@ void Status::start() {
 
 void Status::update() {
     current_time_ = millis() - start_time_;
-    update_current_time();
+    update_current_time_();
 }
 
 void Status::stop() {
@@ -82,9 +79,8 @@ void Status::increment_count() {
     update_count_();
 }
 
-void Status::update_count() {
-    digits_t digits;
-    digits.value = convert(count_);
+void Status::update_count_() {
+    digits_t digits = convert(count_);
     max7219_.write_char(0, digits.a);
     max7219_.write_char(1, digits.b);
     max7219_.write_char(2, digits.c);
@@ -92,8 +88,7 @@ void Status::update_count() {
 }
 
 void Status::update_best_time_() {
-    digits_t digits;
-    digits.value = convert(best_time_ * 100);
+    digits_t digits = convert(best_time_ * 100);
     max7219_.write_char(4, digits.a);
     max7219_.write_char(5, digits.b);
     max7219_.write_char(6, digits.c, true);
@@ -101,9 +96,17 @@ void Status::update_best_time_() {
 }
 
 void Status::update_current_time_() {
-    digits.value = convert(current_time_ * 100);
+    digits_t digits = convert(current_time_ * 100);
     max7219_.write_char(8, digits.a);
     max7219_.write_char(9, digits.b);
     max7219_.write_char(10, digits.c, true);
     max7219_.write_char(11, digits.d);
+}
+
+void Status::bist() {
+    max7219_.bist();
+}
+
+void Status::clear() {
+    max7219_.clear();
 }

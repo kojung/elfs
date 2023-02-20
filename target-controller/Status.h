@@ -48,12 +48,18 @@ class Status {
     /** increment count */
     void increment_count();
 
+    /** run bist */
+    void bist();
+
+    /** clear status */
+    void clear();
+
  private:
     // Max7219 controller
     Max7219Chain max7219_;
 
     // update count value
-    void update_count();
+    void update_count_();
 
     // update best time
     void update_best_time_();
