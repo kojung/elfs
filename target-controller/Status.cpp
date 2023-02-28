@@ -41,10 +41,10 @@ static digits_t convert(int32_t value) {
         digits.c = MAX7219_VALUE_BLANK;
         digits.d = MAX7219_VALUE_BLANK;
     } else {
-        digits.a = (value / (3 * 10)) % 10;
-        digits.b = (value / (2 * 10)) % 10;
-        digits.c = (value / (1 * 10)) % 10;
-        digits.d = value % 10;
+        digits.a = (value / 1000) % 10;
+        digits.b = (value /  100) % 10;
+        digits.c = (value /   10) % 10;
+        digits.d = (value /    1) % 10;
     }
     return digits;
 }
