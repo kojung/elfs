@@ -142,6 +142,7 @@ void loop() {
     // monitor enabled target
     if (targets[enabled_target]->update() > 0) {
         status.stop();
+        status.increment_count();
         update_thresholds();
         random_delay();
         enabled_target = enable_random_target();

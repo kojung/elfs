@@ -32,7 +32,7 @@ typedef union digits_u {
 } digits_t;
 
 // convert from integer to digits_t
-static digits_t convert(int value) {
+static digits_t convert(int32_t value) {
     digits_t digits;
     // negative value denote uninitialized data, return blank digits
     if (value < 0) {
@@ -55,11 +55,11 @@ Status::Status(uint8_t load_pin, uint8_t intensity) :
     start_time_(-1),
     current_time_(-1),
     best_time_(-1) {
-    // nothing else to do
 }
 
 void Status::start() {
     start_time_ = millis();
+    update_count_();
 }
 
 void Status::update() {

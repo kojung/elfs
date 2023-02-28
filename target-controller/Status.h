@@ -68,14 +68,14 @@ class Status {
     void update_current_time_();
 
     // number of targets shot
-    int count_;
+    int32_t count_;
 
     // start time in milliseconds
-    int start_time_;
+    int32_t start_time_;
 
     // current time in milliseconds
-    int current_time_;
+    int32_t current_time_;
 
     // best time in milliseconds
-    int best_time_;
+    int32_t best_time_;
 };
