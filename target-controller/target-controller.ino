@@ -66,6 +66,7 @@ static void beep() {
 
 // enable a random target
 static int enable_random_target() {
+    random_delay();
     int random_target = random(NUM_TARGETS);
     for (int i=0; i < NUM_TARGETS; i++) {
         if (i == random_target) {
@@ -118,7 +119,6 @@ void setup() {
     for (uint8_t i=0; i < NUM_TARGETS; i++) {
         targets[i]->run_self_test();
     }
-    t0.toggle_actuator();
     status.bist();
 
     enabled_target = enable_random_target();
@@ -144,7 +144,6 @@ void loop() {
         status.stop();
         status.increment_count();
         update_thresholds();
-        random_delay();
         enabled_target = enable_random_target();
     }
 }
